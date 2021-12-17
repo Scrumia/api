@@ -12,8 +12,26 @@ jobs:
     steps:
       - uses: actions/checkout@v2
   
+  deployToTest:
+    name: "⚡️ Deploy to test env"
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: [build]
+    environment: 
+      name: test
+      url: 'https://api-capuche-dopale-test.herokuapp.com/'
+      
+    steps:
+      - uses: actions/checkout@v2
+      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: ${{secrets.HEROKU_APP_NAME_TEST}}
+          heroku_email: ${{secrets.HEROKU_MAIL}}
+          
   deployToProd:
-    name: "🚀 Deploy to production environment"
+    name: "🚀 Deploy to prod env"
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     needs: [build]
     environment: 
@@ -27,3 +45,4 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: ${{secrets.HEROKU_APP_NAME_PROD}}
           heroku_email: ${{secrets.HEROKU_MAIL}}
+    
