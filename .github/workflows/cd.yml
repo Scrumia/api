@@ -9,11 +9,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    steps:
+      - uses: actions/checkout@v2
+  
+  deployToProd:
+    name: "🚀 Deploy to production environment"
+    runs-on: ubuntu-latest
+    needs: [build]
+    environment: 
+      name: production
+      url: 'https://api-capuche-dopale.herokuapp.com/'
+      
     steps:
       - uses: actions/checkout@v2
       - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+          heroku_app_name: ${{secrets.HEROKU_APP_NAME_PROD}}
           heroku_email: ${{secrets.HEROKU_MAIL}}
