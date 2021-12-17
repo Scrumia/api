@@ -19,7 +19,7 @@ jobs:
     needs: [build]
     environment: 
       name: test
-      url: ${{secrets.URL_TEST}}
+      url: 'https://api-capuche-dopale-test.herokuapp.com/'
       
     steps:
       - uses: actions/checkout@v2
@@ -36,7 +36,7 @@ jobs:
     needs: [build]
     environment: 
       name: production
-      url: ${{secrets.URL_PROD}}
+      url: 'https://api-capuche-dopale.herokuapp.com/'
       
     steps:
       - uses: actions/checkout@v2
