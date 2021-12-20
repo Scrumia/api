@@ -3,6 +3,8 @@ name: CD
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
@@ -12,6 +14,7 @@ jobs:
   
   deployToTest:
     name: "⚡️ Deploy to test env"
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     needs: [build]
     environment: 
@@ -28,6 +31,7 @@ jobs:
           
   deployToProd:
     name: "🚀 Deploy to prod env"
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     needs: [build]
     environment: 
