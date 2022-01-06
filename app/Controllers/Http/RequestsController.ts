@@ -21,28 +21,29 @@ export default class RequestsController {
    *        application/json:
    *          schema:
    *            type: array
-   *            properties:
-   *              "id":
-   *                type: integer
-   *                example: 1
-   *              name:
-   *                type: string
-   *                example: Conquête d'un territoire isolé
-   *              description:
-   *                type: string
-   *                example: Nous recherchons des aventuriers capables d'assurer la conquête d'un territoire isolé.
-   *              "created_at":
-   *                type: date
-   *                example: 2020-01-01 00:00:00
-   *              bounty:
-   *                type: integer
-   *                example: 100
-   *              status:
-   *                type: string
-   *                example: finished
-   *              duration:
-   *                type: integer
-   *                example: 3
+   *            items:
+   *              properties:
+   *                "id":
+   *                  type: integer
+   *                  example: 1
+   *                name:
+   *                  type: string
+   *                  example: Conquête d'un territoire isolé
+   *                description:
+   *                  type: string
+   *                  example: Nous recherchons des aventuriers capables d'assurer la conquête d'un territoire isolé.
+   *                "created_at":
+   *                  type: date
+   *                  example: 2020-01-01 00:00:00
+   *                bounty:
+   *                  type: integer
+   *                  example: 100
+   *                status:
+   *                  type: string
+   *                  example: finished
+   *                duration:
+   *                  type: integer
+   *                  example: 3
    *
    *    '400':
    *     description: No requests found
