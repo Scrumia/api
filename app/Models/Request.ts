@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
-import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel, column, HasMany, hasMany } from "@ioc:Adonis/Lucid/Orm";
+import RequestAdventurer from "./RequestAdventurer";
 
 export default class Request extends BaseModel {
   @column({ isPrimary: true })
@@ -25,4 +26,7 @@ export default class Request extends BaseModel {
 
   @column()
   public duration: number;
+
+  @hasMany(() => RequestAdventurer)
+  public requestAdventurers: HasMany<typeof RequestAdventurer>;
 }

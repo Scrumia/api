@@ -1,9 +1,13 @@
+import Adventurer from "App/Models/Adventurer";
 import Request from "App/Models/Request";
 import BaseSeeder from "@ioc:Adonis/Lucid/Seeder";
 import { DateTime } from "luxon";
+import RequestAdventurer from "App/Models/RequestAdventurer";
+import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
+import Faker from "faker";
 export default class RequestSeeder extends BaseSeeder {
   public async run() {
-    await Request.updateOrCreateMany("name", [
+    const requests = await Request.updateOrCreateMany("name", [
       {
         name: "Récolte d'élixir",
         description:
@@ -24,5 +28,17 @@ export default class RequestSeeder extends BaseSeeder {
         duration: 3,
       },
     ]);
+    const adventurers = await Adventurer.query().where(
+      "status",
+      AdventurerStatusEnum.AVAILABLE.value
+    );
+    const requestIds = requests.map((request) => request.id);
+
+    for (const adventurer of adventurers) {
+      await RequestAdventurer.create({
+        adventurerId: adventurer.id,
+        requestId: Faker.random.arrayElement(requestIds),
+      });
+    }
   }
 }

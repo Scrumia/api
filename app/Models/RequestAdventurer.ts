@@ -1,13 +1,17 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column } from "@ioc:Adonis/Lucid/Orm";
+import Adventurer from "./Adventurer";
+import Request from "./Request";
 
 export default class RequestAdventurer extends BaseModel {
   @column({ isPrimary: true })
-  public id: number
+  public adventurerId: number;
 
-  @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime
+  @column({ isPrimary: true })
+  public requestId: number;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime
+  @belongsTo(() => Adventurer)
+  public adventurer: BelongsTo<typeof Adventurer>;
+
+  @belongsTo(() => Request)
+  public request: BelongsTo<typeof Request>;
 }
