@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Speciality from './Speciality'
 
 export default class Adventurer extends BaseModel {
@@ -15,8 +15,11 @@ export default class Adventurer extends BaseModel {
   @column()
   public status: string
 
-  @hasMany(() => Speciality)
-  public specialities: HasMany<typeof Speciality>
+  @column()
+  public specialityId: number
+
+  @belongsTo(() => Speciality)
+  public speciality: BelongsTo<typeof Speciality>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
