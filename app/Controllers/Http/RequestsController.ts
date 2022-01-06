@@ -6,7 +6,7 @@ export default class RequestsController {
    *  get:
    *   tags:
    *   - Requests
-   *   summary: Get all existing requests
+   *   summary: List of all requests
    *   description: Allow to get all existing requests
    *   security:
    *    - bearerAuth: []
