@@ -1,7 +1,4 @@
 import Request from "App/Models/Request";
-import Database from "@ioc:Adonis/Lucid/Database";
-
-Database.query();
 export default class RequestsController {
   /**
    * @swagger
