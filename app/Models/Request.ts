@@ -1,6 +1,12 @@
+import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import { DateTime } from "luxon";
-import { BaseModel, column, HasMany, hasMany } from "@ioc:Adonis/Lucid/Orm";
-import RequestAdventurer from "./RequestAdventurer";
+import {
+  BaseModel,
+  column,
+  ManyToMany,
+  manyToMany,
+} from "@ioc:Adonis/Lucid/Orm";
+import Adventurer from "./Adventurer";
 
 export default class Request extends BaseModel {
   @column({ isPrimary: true })
@@ -27,6 +33,6 @@ export default class Request extends BaseModel {
   @column()
   public duration: number;
 
-  @hasMany(() => RequestAdventurer)
-  public requestAdventurers: HasMany<typeof RequestAdventurer>;
+  @manyToMany(() => Adventurer, { pivotTable: "request_adventurers" })
+  public adventurers: ManyToMany<typeof Adventurer>;
 }

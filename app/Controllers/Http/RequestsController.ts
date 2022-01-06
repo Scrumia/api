@@ -48,8 +48,8 @@ export default class RequestsController {
    *    '400':
    *     description: No requests found
    */
-  public async findAllRequests() {
-    const requests = await Request.all();
+  public async index() {
+    const requests = await Request.query().preload("adventurers");
     return requests;
   }
 }
