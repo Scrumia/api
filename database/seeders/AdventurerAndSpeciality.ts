@@ -20,6 +20,12 @@ export default class AdventurerAndSpeciality extends BaseSeeder {
     const specialities = await Speciality.all();
     const specialitiesIds = specialities.map((speciality) => speciality.id);
 
+    const adventurers = await Adventurer.all();
+
+    if (adventurers.length === 10) {
+      return;
+    }
+
     for (let i = 0; i < 10; i++) {
       await Adventurer.create({
         fullName: `${Faker.name.firstName()} ${Faker.name.lastName()}`,
