@@ -8,12 +8,6 @@ export default class RequestsController {
    *   - Requests
    *   summary: Get all existing requests
    *   description: Allow to get all existing requests
-   *   requestBody:
-   *    required: false
-   *    content:
-   *     application/json:
-   *      schema:
-   *        type: object
    *   responses:
    *    '200':
    *      description: A successful response
@@ -44,6 +38,29 @@ export default class RequestsController {
    *                duration:
    *                  type: integer
    *                  example: 3
+   *                adventurers:
+   *                  type: array
+   *                  items:
+   *                   properties:
+   *                    id:
+   *                     type: integer
+   *                     example: 1
+   *                    full_name:
+   *                     type: string
+   *                     example: "John Doe"
+   *                    experience_level:
+   *                     type: integer
+   *                     example: 1.0
+   *                    speciality_id:
+   *                     type: integer
+   *                     example: 1
+   *                    created_at:
+   *                     type: string
+   *                     example: "2020-05-06T14:00:00.000Z"
+   *                    updated_at:
+   *                     type: string
+   *                     example: "2020-05-06T14:00:00.000Z"
+   *
    *
    *    '400':
    *     description: No requests found
