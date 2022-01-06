@@ -1,10 +1,9 @@
 // import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-import Adventurer from "App/Models/Adventurer"
+import Adventurer from "App/Models/Adventurer";
 
 export default class AdventurersController {
-
-    /**
+  /**
    * @swagger
    * /index:
    *  get:
@@ -20,18 +19,42 @@ export default class AdventurersController {
    *      content:
    *        application/json:
    *          schema:
-   *            type: object
-   *            properties:
-   *              "type":
+   *            type: array
+   *            items:
+   *             type: object
+   *             properties:
+   *              id:
+   *               type: integer
+   *               example: 1
+   *              full_name:
+   *               type: string
+   *               example: "John Doe"
+   *              experience_level:
+   *                type: integer
+   *                example: 1.0
+   *              created_at:
    *                type: string
-   *                example: bearer
-   *              token:
+   *                example: "2020-05-06T14:00:00.000Z"
+   *              updated_at:
    *                type: string
-   *                example: epfkemkefmfe
-   *    '400':
-   *     description: User not found
+   *                example: "2020-05-06T14:00:00.000Z"
+   *              speciality:
+   *               type: object
+   *               properties:
+   *                id:
+   *                 type: integer
+   *                 example: 1
+   *                name:
+   *                 type: string
+   *                 example: "Fighter"
+   *                created_at:
+   *                 type: string
+   *                 example: "2020-05-06T14:00:00.000Z"
+   *                updated_at:
+   *                 type: string
+   *                 example: "2020-05-06T14:00:00.000Z"
    */
-    public async index() {
-        return await Adventurer.query().preload("speciality")
-    }
+  public async index() {
+    return await Adventurer.query().preload("speciality");
+  }
 }
