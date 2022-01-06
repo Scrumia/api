@@ -1,4 +1,3 @@
-import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import { DateTime } from "luxon";
 import {
   BaseModel,
