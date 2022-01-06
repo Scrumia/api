@@ -3,7 +3,7 @@ import BaseSeeder from "@ioc:Adonis/Lucid/Seeder";
 import { DateTime } from "luxon";
 export default class RequestSeeder extends BaseSeeder {
   public async run() {
-    await Request.createMany([
+    await Request.updateOrCreateMany("name", [
       {
         name: "Récolte d'élixir",
         description:

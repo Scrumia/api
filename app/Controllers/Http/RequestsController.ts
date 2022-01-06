@@ -5,7 +5,7 @@ export default class RequestsController {
    * /requests:
    *  get:
    *   tags:
-   *   - Securities
+   *   - Requests
    *   summary: Get all existing requests
    *   description: Allow to get all existing requests
    *   requestBody:
@@ -20,7 +20,7 @@ export default class RequestsController {
    *      content:
    *        application/json:
    *          schema:
-   *            type: object
+   *            type: array
    *            properties:
    *              "id":
    *                type: integer
@@ -43,6 +43,7 @@ export default class RequestsController {
    *              duration:
    *                type: integer
    *                example: 3
+   *
    *    '400':
    *     description: No requests found
    */
