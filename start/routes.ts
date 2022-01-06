@@ -24,5 +24,6 @@ Route.post("/login", "SecuritiesController.login");
 
 Route.group(() => {
   Route.post("/logout", "SecuritiesController.logout");
+  Route.get("/adventurers", "AdventurersController.index");
   Route.get("/requests", "RequestsController.findAllRequests");
 }).middleware("auth");
