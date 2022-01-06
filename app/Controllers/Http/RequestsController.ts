@@ -8,6 +8,8 @@ export default class RequestsController {
    *   - Requests
    *   summary: Get all existing requests
    *   description: Allow to get all existing requests
+   *   security:
+   *    - bearerAuth: []
    *   responses:
    *    '200':
    *      description: A successful response
