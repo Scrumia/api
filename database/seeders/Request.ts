@@ -34,11 +34,18 @@ export default class RequestSeeder extends BaseSeeder {
     );
     const requestIds = requests.map((request) => request.id);
 
+    const requestId = Faker.random.arrayElement(requestIds);
     for (const adventurer of adventurers) {
-      await RequestAdventurer.create({
-        adventurerId: adventurer.id,
-        requestId: Faker.random.arrayElement(requestIds),
-      });
+      await RequestAdventurer.updateOrCreate(
+        {
+          adventurerId: adventurer.id,
+          requestId: requestId,
+        },
+        {
+          adventurerId: adventurer.id,
+          requestId: requestId,
+        }
+      );
     }
   }
 }
