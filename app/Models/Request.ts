@@ -18,10 +18,10 @@ export default class Request extends BaseModel {
   public status: string;
 
   @column()
-  public client_name: string;
+  public clientName: string;
 
   @column.dateTime()
-  public started_at: DateTime;
+  public startedAt: DateTime;
 
   @column()
   public duration: number;

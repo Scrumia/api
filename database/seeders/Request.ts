@@ -10,8 +10,8 @@ export default class RequestSeeder extends BaseSeeder {
           "Nous recherchons des aventuriers expérimentés capables de récolter 1.000.000 d'élixir.",
         bounty: 1000,
         status: "started",
-        client_name: "Empire",
-        started_at: DateTime.utc(2027, 3, 12, 5),
+        clientName: "Empire",
+        startedAt: DateTime.utc(2027, 3, 12, 5),
         duration: 3,
       },
       {
@@ -20,7 +20,7 @@ export default class RequestSeeder extends BaseSeeder {
           "Je suis à la recherche de mon cheval qui a été perdu dans le désert. Je recherche un aventurier capable de me le retrouver",
         bounty: 3500,
         status: "not-started",
-        client_name: "Laura Cortez",
+        clientName: "Laura Cortez",
         duration: 3,
       },
     ]);
