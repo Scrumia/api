@@ -5,7 +5,7 @@ import Adventurer from "App/Models/Adventurer";
 export default class AdventurersController {
   /**
    * @swagger
-   * /index:
+   * /adventurers:
    *  get:
    *   tags:
    *   - Adventurers
