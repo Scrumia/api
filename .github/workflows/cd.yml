@@ -45,4 +45,15 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: ${{secrets.HEROKU_APP_NAME_PROD}}
           heroku_email: ${{secrets.HEROKU_MAIL}}
+      
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v5.1
+        
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "🎉 La branche ${{ steps.branch-name.outputs.current_branch }} a bien été deployé en production à l'adresse suivante : https://api-capuche-dopale.herokuapp.com. 🎉 Voir la documentation : https://api-capuche-dopale.herokuapp.com/docs"
     
