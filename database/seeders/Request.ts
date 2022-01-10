@@ -18,6 +18,7 @@ export default class RequestSeeder extends BaseSeeder {
         clientName: "Empire",
         startedAt: DateTime.utc(2027, 3, 12, 5),
         duration: 3,
+        expirationDate: DateTime.utc(2027, 3, 15, 5),
       },
       {
         name: "Recherche d'un cheval perdu",
@@ -27,6 +28,8 @@ export default class RequestSeeder extends BaseSeeder {
         status: RequestStatusEnum.PENDING.value,
         clientName: "Laura Cortez",
         duration: 3,
+        startedAt: DateTime.utc(2027, 3, 12, 5),
+        expirationDate: DateTime.utc(2027, 3, 15, 5),
       },
       {
         name: "Trouver de nouvelles sources d'eau",
@@ -37,12 +40,28 @@ export default class RequestSeeder extends BaseSeeder {
         clientName: "Empire",
         duration: 25,
         startedAt: DateTime.utc(2026, 2, 12, 5),
+        expirationDate: DateTime.utc(2026, 2, 15, 5),
       },
       {
         name: "Soigner les animaux",
+        description:
+          "Nous recherchons des aventuriers capables de soigner les animaux.",
+        bounty: 2000,
+        status: RequestStatusEnum.STARTED.value,
+        clientName: "Empire",
+        duration: 3,
+        startedAt: DateTime.utc(2026, 2, 12, 5),
+        expirationDate: DateTime.utc(2026, 2, 15, 5),
       },
       {
         name: "Aller à la pêche",
+        description: "Nous recherchons des aventuriers capables de pêcher.",
+        bounty: 3000,
+        status: RequestStatusEnum.FINISHED.value,
+        clientName: "Empire",
+        duration: 3,
+        startedAt: DateTime.utc(2026, 2, 12, 5),
+        expirationDate: DateTime.utc(2026, 2, 15, 5),
       },
     ]);
     const adventurers = await Adventurer.query().where(

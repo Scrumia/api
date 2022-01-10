@@ -33,7 +33,7 @@ export default class Request extends BaseModel {
   public duration: number;
 
   @column()
-  public expirationDate: string;
+  public expirationDate: DateTime;
 
   @manyToMany(() => Adventurer, { pivotTable: "request_adventurers" })
   public adventurers: ManyToMany<typeof Adventurer>;

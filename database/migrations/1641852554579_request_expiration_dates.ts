@@ -9,7 +9,7 @@ export default class RequestExpirationDates extends BaseSchema {
 
     this.schema.alterTable(this.tableName, (table) => {
       table
-        .string("expiration_date")
+        .datetime("expiration_date")
         .notNullable()
         .defaultTo(currentDate.toISOString().substring(0, 10));
     });
