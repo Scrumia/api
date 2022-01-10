@@ -31,12 +31,27 @@ export default class SecuritiesController {
    *          schema:
    *            type: object
    *            properties:
-   *              "type":
-   *                type: string
-   *                example: bearer
    *              token:
    *                type: string
    *                example: epfkemkefmfe
+   *              user:
+   *               type: object
+   *               properties:
+   *                id:
+   *                 type: number
+   *                 example: 1
+   *                email:
+   *                 type: string
+   *                 example: john@doe.com
+   *                fullName:
+   *                 type: string
+   *                 example: John Doe
+   *                createdAt:
+   *                 type: string
+   *                 example: 2020-01-01T00:00:00.000Z
+   *                updatedAt:
+   *                 type: string
+   *                 example: 2020-01-01T00:00:00.000Z
    *    '400':
    *     description: User not found
    */
