@@ -1,4 +1,5 @@
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import User from "App/Models/User";
 
 export default class SecuritiesController {
   /**
@@ -43,8 +44,8 @@ export default class SecuritiesController {
     const email = request.input("email");
     const password = request.input("password");
 
-    const token = auth.attempt(email, password);
-    return token;
+    const { token, user } = await auth.attempt(email, password);
+    return { token, user };
   }
 
   /**
