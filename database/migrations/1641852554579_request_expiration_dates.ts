@@ -1,22 +1,23 @@
-import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import BaseSchema from "@ioc:Adonis/Lucid/Schema";
 
-export default class Alters extends BaseSchema {
+export default class RequestExpirationDates extends BaseSchema {
   protected tableName = "requests";
 
   public async up() {
+    const currentDate = new Date();
+    currentDate.setMonth(currentDate.getMonth() + 1);
+
     this.schema.alterTable(this.tableName, (table) => {
       table
-        .string("status")
+        .datetime("expiration_date")
         .notNullable()
-        .defaultTo(RequestStatusEnum.PENDING.value)
-        .alter();
+        .defaultTo(currentDate.toISOString().substring(0, 10));
     });
   }
 
   public async down() {
     this.schema.alterTable(this.tableName, (table) => {
-      table.string("status").notNullable().defaultTo(null).alter();
+      table.dropColumn("expiration_date");
     });
   }
 }

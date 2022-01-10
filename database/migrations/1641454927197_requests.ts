@@ -11,7 +11,7 @@ export default class Requests extends BaseSchema {
       table.integer("bounty").notNullable();
       table.string("status").notNullable();
       table.string("client_name").notNullable();
-      table.dateTime("started_at").nullable();
+      table.dateTime("started_at").notNullable();
       table.integer("duration").notNullable();
     });
   }

@@ -28,7 +28,7 @@ export default class RequestsController {
    *                description:
    *                  type: string
    *                  example: Nous recherchons des aventuriers capables d'assurer la conquête d'un territoire isolé.
-   *                "created_at":
+   *                created_at:
    *                  type: date
    *                  example: 2020-01-01 00:00:00
    *                bounty:
@@ -40,6 +40,12 @@ export default class RequestsController {
    *                duration:
    *                  type: integer
    *                  example: 3
+   *                started_at:
+   *                 type: date
+   *                 example: 2020-01-01 00:00:00
+   *                expiration_date:
+   *                 type: date
+   *                 example: 2020-01-01 00:00:00
    *                adventurers:
    *                  type: array
    *                  items:
