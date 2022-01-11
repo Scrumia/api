@@ -27,7 +27,7 @@ Route.group(() => {
   Route.get("/adventurers", "AdventurersController.index");
   Route.get("/requests", "RequestsController.index");
   Route.delete(
-    "/requests/:id/adventurers/:adventurerId",
+    "/requests/:requestId/adventurers/:adventurerId",
     "RequestsController.removeAdventurer"
   );
 }).middleware("auth");

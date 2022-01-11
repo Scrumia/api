@@ -1,4 +1,9 @@
+import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
+import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import Request from "App/Models/Request";
+import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import RequestAdventurer from "App/Models/RequestAdventurer";
+
 export default class RequestsController {
   /**
    * @swagger
@@ -76,5 +81,49 @@ export default class RequestsController {
   public async index() {
     const requests = await Request.query().preload("adventurers");
     return requests;
+  }
+
+  public async removeAdventurer({ params, response }: HttpContextContract) {
+    const requestId = params.requestId;
+    const adventurerId = params.adventurerId;
+
+    const request = await Request.query()
+      .where("id", requestId)
+      .innerJoin(
+        "request_adventurers",
+        "request_adventurers.request_id",
+        "requests.id"
+      )
+      .where("request_adventurers.adventurer_id", adventurerId)
+      .preload("adventurers", (adventurerQuery) => {
+        adventurerQuery.where("id", adventurerId);
+      })
+      .first();
+
+    if (!request) {
+      return response
+        .status(404)
+        .send({ error: "Request or adventurer not found" });
+    }
+
+    if (
+      request.status === RequestStatusEnum.STARTED.value ||
+      request.status === RequestStatusEnum.FINISHED.value
+    ) {
+      return response.status(400).send({
+        error:
+          "You can't delete an adventurer : The request already started or finished",
+      });
+    }
+
+    await RequestAdventurer.query()
+      .where("request_id", requestId)
+      .where("adventurer_id", adventurerId)
+      .delete();
+
+    request.adventurers[0].status = AdventurerStatusEnum.AVAILABLE.value;
+    await request.adventurers[0].save();
+
+    return response.status(204);
   }
 }
