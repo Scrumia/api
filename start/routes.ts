@@ -26,4 +26,8 @@ Route.group(() => {
   Route.post("/logout", "SecuritiesController.logout");
   Route.get("/adventurers", "AdventurersController.index");
   Route.get("/requests", "RequestsController.index");
+  Route.delete(
+    "/requests/:id/adventurers/:adventurerId",
+    "RequestsController.removeAdventurer"
+  );
 }).middleware("auth");
