@@ -83,6 +83,38 @@ export default class RequestsController {
     return requests;
   }
 
+  /**
+   * @swagger
+   * /requests/{requestId}/adventurers/{adventurerId}:
+   *  delete:
+   *   tags:
+   *   - Requests
+   *   summary: Remove an adventurer from a request
+   *   description: Allow to remove an adventurer from a request
+   *   security:
+   *    - bearerAuth: []
+   *   parameters:
+   *    - in: path
+   *      name: requestId
+   *      schema:
+   *       type: integer
+   *      required: true
+   *      description: The id of the request
+   *    - in: path
+   *      name: adventurerId
+   *      schema:
+   *       type: integer
+   *      required: true
+   *      description: The id of the adventurer
+   *   responses:
+   *    '200':
+   *      description: Adventurer removed from request
+   *    '400':
+   *      description: Request already started or finished and can't be modified
+   *    '404':
+   *      description: No requests or adventurer found
+   *
+   */
   public async removeAdventurer({ params, response }: HttpContextContract) {
     const requestId = params.requestId;
     const adventurerId = params.adventurerId;
