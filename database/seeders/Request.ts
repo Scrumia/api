@@ -66,7 +66,7 @@ export default class RequestSeeder extends BaseSeeder {
     ]);
     const adventurers = await Adventurer.query().where(
       "status",
-      AdventurerStatusEnum.AVAILABLE.value
+      AdventurerStatusEnum.WORK.value
     );
     const requestIds = requests.map((request) => request.id);
 
