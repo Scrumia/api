@@ -49,7 +49,7 @@ test.group("Adventurers list", (group) => {
       "created_at",
       "updated_at",
     ]);
-  });
+  }).timeout(0);
 });
 
 test.group("Get an adventurer by id", (group) => {

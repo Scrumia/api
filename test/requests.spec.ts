@@ -69,7 +69,7 @@ test.group("Request list", (group) => {
       "created_at",
       "updated_at",
     ]);
-  });
+  }).timeout(0);
 });
 
 test.group("Get a request by id", (group) => {
@@ -136,7 +136,7 @@ test.group("Get a request by id", (group) => {
       "created_at",
       "updated_at",
     ]);
-  });
+  }).timeout(0);
 });
 
 test.group("Remove an adventurer from a request", (group) => {
@@ -186,7 +186,7 @@ test.group("Remove an adventurer from a request", (group) => {
 
     const adventurerUpdated = await Adventurer.find(adventurer.id);
     assert.equal(adventurerUpdated?.status, "available");
-  });
+  }).timeout(0);
 });
 
 test.group("Create a request", (group) => {
