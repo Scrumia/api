@@ -1,4 +1,3 @@
-import { Adventurer } from "App/Models/Adventurer";
 import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
 import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import Request from "App/Models/Request";
