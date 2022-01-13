@@ -13,6 +13,12 @@ export default class Requests extends BaseSchema {
       table.string("client_name").notNullable();
       table.dateTime("started_at").notNullable();
       table.integer("duration").notNullable();
+
+      /**
+       * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
+       */
+      table.timestamp("created_at", { useTz: true });
+      table.timestamp("updated_at", { useTz: true });
     });
   }
 
