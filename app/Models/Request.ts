@@ -35,6 +35,12 @@ export default class Request extends BaseModel {
   @column()
   public expirationDate: DateTime;
 
+  @column.dateTime({ autoCreate: true })
+  public createdAt: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public updatedAt: DateTime;
+
   @manyToMany(() => Adventurer, { pivotTable: "request_adventurers" })
   public adventurers: ManyToMany<typeof Adventurer>;
 }
