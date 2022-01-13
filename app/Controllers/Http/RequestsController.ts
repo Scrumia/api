@@ -3,6 +3,7 @@ import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import Request from "App/Models/Request";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import RequestAdventurer from "App/Models/RequestAdventurer";
+import CreateRequestValidator from "App/Validators/CreateRequestValidator";
 
 export default class RequestsController {
   /**
@@ -221,5 +222,56 @@ export default class RequestsController {
     await request.adventurers[0].save();
 
     return response.status(204);
+  }
+
+  /**
+   * @swagger
+   * /requests:
+   *  post:
+   *   tags:
+   *   - Requests
+   *   summary: Create a new request
+   *   description: Allow to create a new request
+   *   security:
+   *    - bearerAuth: []
+   *   requestBody:
+   *    required: true
+   *    content:
+   *      application/json:
+   *       schema:
+   *        type: object
+   *        properties:
+   *         name:
+   *          type: string
+   *          example: Conquête d'un territoire isolé
+   *         description:
+   *          type: string
+   *          example: Nous recherchons des aventuriers capables d'assurer la conquête d'un territoire isolé.
+   *         bounty:
+   *          type: integer
+   *          example: 100
+   *         duration:
+   *          type: integer
+   *          example: 3
+   *         client_name:
+   *          type: string
+   *          example: "John Doe"
+   *         started_at:
+   *          type: date
+   *          example: 2020-04-01 00:00:00
+   *         expiration_date:
+   *          type: date
+   *          example: 2020-03-01 00:00:00
+   *   responses:
+   *    '201':
+   *      description: A successful response
+   *    '422':
+   *     description: Unprocessable entity
+   */
+  public async create({ request, response }: HttpContextContract) {
+    const newRequestValidated = await request.validate(CreateRequestValidator);
+    await Request.create(newRequestValidated);
+
+    return response.status(201);
   }
 }
