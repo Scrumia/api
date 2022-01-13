@@ -16,16 +16,24 @@ jobs:
     name: "🧪 Tests"
     runs-on: ubuntu-latest
     needs: [build]
+    strategy:
+      matrix:
+        node-version: [14.x]
     steps:
       - uses: actions/checkout@v2
-      script: |
-        NODE_ENV=${{secrets.ENV_TEST}} 
-        PG_HOST=${{secrets.DATABASE_HOST_TEST}} 
-        PG_PORT=${{secrets.DATABASE_PORT_TEST}} 
-        PG_USER=${{secrets.DATABASE_USER_TEST}} 
-        PG_PASSWORD=${{secrets.DATABASE_PASSWORD_TEST}} 
-        PG_DB_NAME=${{secrets.DATABASE_NAME_TEST}} 
-        npm test
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - run: |
+          NODE_ENV=${{secrets.ENV_TEST}} 
+          PG_HOST=${{secrets.DATABASE_HOST_TEST}} 
+          PG_PORT=${{secrets.DATABASE_PORT_TEST}} 
+          PG_USER=${{secrets.DATABASE_USER_TEST}} 
+          PG_PASSWORD=${{secrets.DATABASE_PASSWORD_TEST}} 
+          PG_DB_NAME=${{secrets.DATABASE_NAME_TEST}} 
+          npm test
         
   
   deployToTest:
