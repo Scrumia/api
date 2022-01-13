@@ -110,7 +110,16 @@ export default class AdventurersController {
    *                 type: string
    *                 example: "2020-05-06T14:00:00.000Z"
    */
-  public async getById({ params }: HttpContextContract) {
-    return await Adventurer.find(params.adventurerId);
+  public async show({ params, response }: HttpContextContract) {
+    const adventurer = await Adventurer.query()
+      .where("id", params.adventurerId)
+      .preload("speciality")
+      .first();
+
+    if (!adventurer) {
+      return response.status(404).send({ error: "Adventurer not found" });
+    }
+
+    return adventurer;
   }
 }

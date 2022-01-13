@@ -27,7 +27,7 @@ Route.group(() => {
 
   // Adventurers
   Route.get("/adventurers", "AdventurersController.index");
-  Route.get("/adventurer/:adventurerId", "AdventurersController.getById");
+  Route.get("/adventurers/:adventurerId", "AdventurersController.show");
 
   // Requests
   Route.get("/requests", "RequestsController.index");
@@ -37,5 +37,4 @@ Route.group(() => {
     "/requests/:requestId/adventurers/:adventurerId",
     "RequestsController.removeAdventurer"
   );
-
 }).middleware("auth");

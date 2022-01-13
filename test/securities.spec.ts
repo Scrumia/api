@@ -9,7 +9,7 @@ test.group("Login", (group) => {
   let user;
   group.beforeEach(async () => {
     await Database.beginGlobalTransaction();
-    user = await createUser("test@test.com", "test", "test");
+    user = await createUser();
   });
 
   group.afterEach(async () => {
