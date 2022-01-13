@@ -164,7 +164,6 @@ export default class RequestsController {
   }
 
 
-
   public async create({request, response}: HttpContextContract) {
     const newRequestValidated = await request.validate(CreateRequestValidator)
     await Request.create(newRequestValidated)
