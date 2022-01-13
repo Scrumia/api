@@ -2,8 +2,8 @@ import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
 import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import Request from "App/Models/Request";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import RequestAdventurer from "App/Models/RequestAdventurer";
 import CreateRequestValidator from "App/Validators/CreateRequestValidator";
+import Adventurer from "App/Models/Adventurer";
 
 export default class RequestsController {
   /**
@@ -77,6 +77,9 @@ export default class RequestsController {
    *                    updated_at:
    *                     type: string
    *                     example: "2020-05-06T14:00:00.000Z"
+   *                    status:
+   *                      type: string
+   *                      example: "available"
    *
    *
    *    '400':
@@ -133,15 +136,59 @@ export default class RequestsController {
    *                expiration_date:
    *                  type: date
    *                  example: 2020-03-01 00:00:00
-   *
+   *                adventurers:
+   *                 type: array
+   *                 items:
+   *                  properties:
+   *                   id:
+   *                    type: integer
+   *                    example: 1
+   *                   full_name:
+   *                     type: string
+   *                     example: "John Doe"
+   *                   experience_level:
+   *                     type: integer
+   *                     example: 1.0
+   *                   speciality_id:
+   *                     type: integer
+   *                     example: 1
+   *                   created_at:
+   *                     type: string
+   *                     example: "2020-05-06T14:00:00.000Z"
+   *                   updated_at:
+   *                     type: string
+   *                     example: "2020-05-06T14:00:00.000Z"
+   *                   status:
+   *                     type: string
+   *                     example: "available"
+   *                   speciality:
+   *                     type: object
+   *                     properties:
+   *                      id:
+   *                       type: integer
+   *                       example: 1
+   *                      name:
+   *                       type: string
+   *                       example: "Aventure"
+   *                      created_at:
+   *                       type: string
+   *                       example: "2020-05-06T14:00:00.000Z"
+   *                      updated_at:
+   *                       type: string
+   *                       example: "2020-05-06T14:00:00.000Z"
    *
    *
    *    '400':
    *     description: No requests found
    */
-  public async requestId({ params, response }: HttpContextContract) {
+  public async show({ params, response }: HttpContextContract) {
     const requestId = params.requestId;
-    const request = await Request.findBy("id", requestId);
+    const request = await Request.query()
+      .where("id", requestId)
+      .preload("adventurers", (adventurer) => {
+        adventurer.preload("speciality");
+      })
+      .first();
     if (!request) {
       return response.status(404).send({ error: "Request not found" });
     }
@@ -192,6 +239,7 @@ export default class RequestsController {
         "requests.id"
       )
       .where("request_adventurers.adventurer_id", adventurerId)
+      .where("request_adventurers.request_id", requestId)
       .preload("adventurers", (adventurerQuery) => {
         adventurerQuery.where("id", adventurerId);
       })
@@ -213,13 +261,13 @@ export default class RequestsController {
       });
     }
 
-    await RequestAdventurer.query()
-      .where("request_id", requestId)
-      .where("adventurer_id", adventurerId)
-      .delete();
+    await request.related("adventurers").detach([adventurerId]);
 
-    request.adventurers[0].status = AdventurerStatusEnum.AVAILABLE.value;
-    await request.adventurers[0].save();
+    const adventurer = await Adventurer.findBy("id", adventurerId);
+    if (adventurer) {
+      adventurer.status = AdventurerStatusEnum.AVAILABLE.value;
+      await adventurer.save();
+    }
 
     return response.status(204);
   }
@@ -268,7 +316,7 @@ export default class RequestsController {
    *    '422':
    *     description: Unprocessable entity
    */
-  public async create({ request, response }: HttpContextContract) {
+  public async store({ request, response }: HttpContextContract) {
     const newRequestValidated = await request.validate(CreateRequestValidator);
     await Request.create(newRequestValidated);
 

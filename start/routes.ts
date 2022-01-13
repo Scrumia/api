@@ -27,15 +27,14 @@ Route.group(() => {
 
   // Adventurers
   Route.get("/adventurers", "AdventurersController.index");
-  Route.get("/adventurer/:adventurerId", "AdventurersController.getById");
+  Route.get("/adventurers/:adventurerId", "AdventurersController.show");
 
   // Requests
   Route.get("/requests", "RequestsController.index");
-  Route.post("/requests", "RequestsController.create");
-  Route.get("/requests/:requestId", "RequestsController.requestId");
+  Route.post("/requests", "RequestsController.store");
+  Route.get("/requests/:requestId", "RequestsController.show");
   Route.delete(
     "/requests/:requestId/adventurers/:adventurerId",
     "RequestsController.removeAdventurer"
   );
-
 }).middleware("auth");

@@ -1,29 +1,40 @@
-import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
-import Speciality from './Speciality'
+import { DateTime } from "luxon";
+import {
+  BaseModel,
+  BelongsTo,
+  belongsTo,
+  column,
+  ManyToMany,
+  manyToMany,
+} from "@ioc:Adonis/Lucid/Orm";
+import Speciality from "./Speciality";
+import Request from "./Request";
 
 export default class Adventurer extends BaseModel {
   @column({ isPrimary: true })
-  public id: number
+  public id: number;
 
   @column()
-  public fullName: string
+  public fullName: string;
 
   @column()
-  public experienceLevel: number
+  public experienceLevel: number;
 
   @column()
-  public status: string
+  public status: string;
 
   @column()
-  public specialityId: number
+  public specialityId: number;
 
   @belongsTo(() => Speciality)
-  public speciality: BelongsTo<typeof Speciality>
+  public speciality: BelongsTo<typeof Speciality>;
 
   @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime
+  public createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime
+  public updatedAt: DateTime;
+
+  @manyToMany(() => Request, { pivotTable: "request_adventurers" })
+  public requests: ManyToMany<typeof Request>;
 }
