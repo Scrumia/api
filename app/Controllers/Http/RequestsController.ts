@@ -36,6 +36,9 @@ export default class RequestsController {
    *                created_at:
    *                  type: date
    *                  example: 2020-01-01 00:00:00
+   *                updated_at:
+   *                  type: date
+   *                  example: 2020-01-01 00:00:00
    *                bounty:
    *                  type: integer
    *                  example: 100
