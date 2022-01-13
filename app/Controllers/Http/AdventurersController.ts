@@ -110,7 +110,7 @@ export default class AdventurersController {
    *                 type: string
    *                 example: "2020-05-06T14:00:00.000Z"
    */
-  public async getById({ params, response }: HttpContextContract) {
+  public async getById({ params }: HttpContextContract) {
     return await Adventurer.find(params.adventurerId);
   }
 }
