@@ -1,3 +1,4 @@
+import { Adventurer } from "App/Models/Adventurer";
 import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
 import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import Request from "App/Models/Request";
@@ -81,6 +82,67 @@ export default class RequestsController {
   public async index() {
     const requests = await Request.query().preload("adventurers");
     return requests;
+  }
+
+  /**
+   * @swagger
+   * /requests/{requestId}:
+   *  get:
+   *   tags:
+   *   - Requests
+   *   summary: Find request by ID
+   *   description: Allow to get one request
+   *   security:
+   *    - bearerAuth: []
+   *   responses:
+   *    '200':
+   *      description: A successful response
+   *      content:
+   *        application/json:
+   *          schema:
+   *            type: array
+   *            items:
+   *              properties:
+   *                "id":
+   *                  type: integer
+   *                  example: 1
+   *                name:
+   *                  type: string
+   *                  example: Conquête d'un territoire isolé
+   *                description:
+   *                  type: string
+   *                  example: Nous recherchons des aventuriers capables d'assurer la conquête d'un territoire isolé.
+   *                bounty:
+   *                  type: integer
+   *                  example: 100
+   *                status:
+   *                  type: string
+   *                  example: finished
+   *                duration:
+   *                  type: integer
+   *                  example: 3
+   *                client_name:
+   *                  type: string
+   *                  example: "John Doe"
+   *                started_at:
+   *                  type: date
+   *                  example: 2020-04-01 00:00:00
+   *                expiration_date:
+   *                  type: date
+   *                  example: 2020-03-01 00:00:00
+   *
+   *
+   *
+   *    '400':
+   *     description: No requests found
+   */
+  public async requestId({ params, response }: HttpContextContract) {
+    const requestId = params.requestId;
+    const request = await Request.findBy("id", requestId);
+    if (!request) {
+      return response.status(404).send({ error: "Request not found" });
+    }
+    return request;
   }
 
   /**
