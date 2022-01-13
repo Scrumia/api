@@ -3,6 +3,7 @@ import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import Request from "App/Models/Request";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import RequestAdventurer from "App/Models/RequestAdventurer";
+import CreateRequestValidator from "App/Validators/CreateRequestValidator";
 
 export default class RequestsController {
   /**
@@ -161,4 +162,15 @@ export default class RequestsController {
 
     return response.status(204);
   }
+
+
+
+  public async create({request, response}: HttpContextContract) {
+    const newRequestValidated = await request.validate(CreateRequestValidator)
+    await Request.create(newRequestValidated)
+
+    return response.status(201)
+  }
+
+
 }

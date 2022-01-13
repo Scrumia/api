@@ -26,6 +26,7 @@ Route.group(() => {
   Route.post("/logout", "SecuritiesController.logout");
   Route.get("/adventurers", "AdventurersController.index");
   Route.get("/requests", "RequestsController.index");
+  Route.post("/requests", "RequestsController.create");
   Route.delete(
     "/requests/:requestId/adventurers/:adventurerId",
     "RequestsController.removeAdventurer"
