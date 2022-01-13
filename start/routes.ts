@@ -24,10 +24,16 @@ Route.post("/login", "SecuritiesController.login");
 
 Route.group(() => {
   Route.post("/logout", "SecuritiesController.logout");
+
+  // Adventurers
   Route.get("/adventurers", "AdventurersController.index");
+  Route.get("/adventurer/:adventurerId", "AdventurersController.getById");
+
+  // Requests
   Route.get("/requests", "RequestsController.index");
   Route.delete(
     "/requests/:requestId/adventurers/:adventurerId",
     "RequestsController.removeAdventurer"
   );
+
 }).middleware("auth");
