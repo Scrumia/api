@@ -2,16 +2,16 @@ name: CD
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-  
+
   test:
     name: "🧪 Tests"
     runs-on: ubuntu-latest
@@ -25,27 +25,19 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-        
+
       - run: npm install
-      - run: |
-          NODE_ENV=${{secrets.ENV_TEST}} 
-          PG_HOST=${{secrets.DATABASE_HOST_TEST}} 
-          PG_PORT=${{secrets.DATABASE_PORT_TEST}} 
-          PG_USER=${{secrets.DATABASE_USER_TEST}} 
-          PG_PASSWORD=${{secrets.DATABASE_PASSWORD_TEST}} 
-          PG_DB_NAME=${{secrets.DATABASE_NAME_TEST}} 
-          npm test
-        
-  
+      - run: NODE_ENV=${{secrets.ENV_TEST}} PG_HOST=${{secrets.DATABASE_HOST_TEST}} PG_PORT=${{secrets.DATABASE_PORT_TEST}} PG_USER=${{secrets.DATABASE_USER_TEST}} PG_PASSWORD=${{secrets.DATABASE_PASSWORD_TEST}} PG_DB_NAME=${{secrets.DATABASE_NAME_TEST}} npm test
+
   deployToTest:
     name: "⚡️ Deploy to test env"
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     needs: [build, test]
-    environment: 
+    environment:
       name: test
-      url: 'https://api-capuche-dopale-test.herokuapp.com/'
-      
+      url: "https://api-capuche-dopale-test.herokuapp.com/"
+
     steps:
       - uses: actions/checkout@v2
       - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
@@ -53,16 +45,16 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: ${{secrets.HEROKU_APP_NAME_TEST}}
           heroku_email: ${{secrets.HEROKU_MAIL}}
-          
+
   deployToProd:
     name: "🚀 Deploy to prod env"
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     needs: [build, test]
-    environment: 
+    environment:
       name: production
-      url: 'https://api-capuche-dopale.herokuapp.com/'
-      
+      url: "https://api-capuche-dopale.herokuapp.com/"
+
     steps:
       - uses: actions/checkout@v2
       - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
@@ -70,16 +62,15 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: ${{secrets.HEROKU_APP_NAME_PROD}}
           heroku_email: ${{secrets.HEROKU_MAIL}}
-        
+
       - name: Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
           args: "@everyone 🎉 Le projet a bien été deployé en production à l'adresse suivante : https://api-capuche-dopale.herokuapp.com. 🎉 Voir la documentation : https://api-capuche-dopale.herokuapp.com/docs"
-          
+
       - name: Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
-    
