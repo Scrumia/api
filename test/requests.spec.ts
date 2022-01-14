@@ -7,6 +7,7 @@ import test from "japa";
 import supertest from "supertest";
 import { AdventurerFactory } from "Database/factories/AdventurerFactory";
 import Adventurer from "App/Models/Adventurer";
+import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 
 const BASE_URL = `http://${process.env.HOST}:${process.env.PORT}`;
 
@@ -362,4 +363,231 @@ test.group("Create a request", (group) => {
 
     assert.equal(statusCode, 201);
   });
+});
+test.group("Update a request", (group) => {
+  let user;
+  group.beforeEach(async () => {
+    await Database.beginGlobalTransaction();
+    user = await loginUser(BASE_URL);
+  });
+
+  group.afterEach(async () => {
+    await Database.rollbackGlobalTransaction();
+  });
+
+  test("should that return name is too long |  > 120 caracters ", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(150),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(100),
+        duration: Faker.datatype.number(100),
+        started_at: DateTime.now()
+          .plus({ day: 1 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ day: 6 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(RequestStatusEnum.valuesString.split(",")),
+      });
+
+    assert.equal(body.errors[0].message, "maxLength validation failed");
+  });
+
+  test("should that return description is too long |  > 500 caracters ", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(1),
+        description: Faker.lorem.words(150),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(100),
+        duration: Faker.datatype.number(100),
+        started_at: DateTime.now()
+          .plus({ day: 1 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ day: 6 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(RequestStatusEnum.valuesString.split(",")),
+      });
+
+    assert.equal(body.errors[0].message, "maxLength validation failed");
+  });
+
+  test("should that return client name is too long |  > 50 caracters ", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(1),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(150),
+        bounty: Faker.datatype.number(100),
+        duration: Faker.datatype.number(100),
+        started_at: DateTime.now()
+          .plus({ day: 1 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ day: 6 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(RequestStatusEnum.valuesString.split(",")),
+      });
+
+    assert.equal(body.errors[0].message, "maxLength validation failed");
+  });
+
+  test("should that return started_at and expiration_date are sended with bad format", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(100),
+        duration: Faker.datatype.number(100),
+        started_at: "ee",
+        expiration_date: "2022",
+        status: Faker.random.arrayElement(RequestStatusEnum.valuesString.split(",")),
+      });
+
+    assert.equal(
+      body.errors[0].message,
+      `the input "ee" can't be parsed as format yyyy-MM-dd HH:mm:ss`
+    );
+  });
+
+  test("should that return started_at and expiration_date has bad values", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(100),
+        duration: Faker.datatype.number(100),
+        started_at: DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(RequestStatusEnum.valuesString.split(",")),
+      });
+
+    assert.equal(body.errors[0].message, `after date validation failed`);
+  });
+
+  test("should that return bounty value is not in range", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(-1),
+        duration: Faker.datatype.number(100),
+        started_at: DateTime.now()
+          .plus({ days: 2 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ days: 15 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(RequestStatusEnum.valuesString.split(",")),
+      });
+
+    assert.equal(body.errors[0].message, `range validation failed`);
+  });
+
+  test("should that return duration value is not in range", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(1),
+        duration: Faker.datatype.number(1555555555),
+        started_at: DateTime.now()
+          .plus({ days: 2 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ days: 15 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(RequestStatusEnum.valuesString.split(",")),
+      });
+
+    assert.equal(body.errors[0].message, `range validation failed`);
+  });
+
+  test("should that return duration value is in range", async (assert) => {
+    const { statusCode } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(1),
+        duration: Faker.datatype.number(10),
+        started_at: DateTime.now()
+          .plus({ days: 2 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ days: 15 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(RequestStatusEnum.valuesString.split(",")),
+      });
+
+    assert.equal(statusCode, 200);
+  });
+
+  test("should that return status value is not correct", async (assert) => {
+    const { statusCode } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(1),
+        duration: Faker.datatype.number(10),
+        started_at: DateTime.now()
+          .plus({ days: 2 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ days: 15 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: 'finish',
+      });
+
+    assert.equal(statusCode, 422);
+  });
+
+  test("should that return status value is correct", async (assert) => {
+    const { statusCode } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(1),
+        duration: Faker.datatype.number(10),
+        started_at: DateTime.now()
+          .plus({ days: 2 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ days: 15 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(RequestStatusEnum.valuesString.split(",")),
+      });
+
+    assert.equal(statusCode, 200);
+  });
+
 });
