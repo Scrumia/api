@@ -37,4 +37,5 @@ Route.group(() => {
     "/requests/:requestId/adventurers/:adventurerId",
     "RequestsController.removeAdventurer"
   );
+  Route.post("/requests/:requestId/adventurers", "RequestsController.addAdventurer")
 }).middleware("auth");

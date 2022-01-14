@@ -4,6 +4,7 @@ import Request from "App/Models/Request";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import CreateRequestValidator from "App/Validators/CreateRequestValidator";
 import Adventurer from "App/Models/Adventurer";
+import AddAdventurerValidator from "App/Validators/AddAdventurerValidator";
 
 export default class RequestsController {
   /**
@@ -321,5 +322,48 @@ export default class RequestsController {
     await Request.create(newRequestValidated);
 
     return response.status(201);
+  }
+
+  public async addAdventurer({ params, request, response }: HttpContextContract) {
+    const currentRequest = await Request.query().where('id', params.requestId).first()
+
+    if(!currentRequest) {
+      return response.status(404).send({ error: 'Request not found' })
+    }
+    
+    if (currentRequest.status !== RequestStatusEnum.PENDING.value) {
+      return response.status(404).send({ error: 'You can not add an adventurer on a started or finished request' })
+    }
+
+    const newAdventurerValidated = await request.validate(AddAdventurerValidator)
+
+    const isAdventurerAlreadyAdd = await Request
+      .query()
+      .innerJoin(
+        "request_adventurers",
+        "request_adventurers.request_id",
+        "requests.id"
+      )
+      .where("request_adventurers.adventurer_id", newAdventurerValidated.adventurer_id)
+      .where("request_adventurers.request_id", currentRequest.id)
+      .where('id', currentRequest.id)
+      .first()
+    
+    if(isAdventurerAlreadyAdd) {
+      return response.status(400).send({error: 'Adventurer already added'})
+    }
+
+    const adventurer = await Adventurer.query().where('id', newAdventurerValidated.adventurer_id).where('status', AdventurerStatusEnum.AVAILABLE.value).first()
+
+    if (!adventurer) {
+      return response.status(404).send({ error: 'Adventurer not available' })
+    }
+
+    await currentRequest.related('adventurers').attach([adventurer.id])
+
+    adventurer.status = AdventurerStatusEnum.WORK.value
+    await adventurer.save()
+
+    return await Request.query().where('id', currentRequest.id).preload('adventurers')
   }
 }
