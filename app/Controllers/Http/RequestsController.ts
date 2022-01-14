@@ -362,6 +362,9 @@ export default class RequestsController {
    *         expiration_date:
    *          type: date
    *          example: 2020-03-01 00:00:00
+   *         status:
+   *          type: string
+   *          example: "started"
    *   responses:
    *    '200':
    *      description: A successful response
@@ -369,7 +372,12 @@ export default class RequestsController {
    *     description: Unprocessable entity
    */
   public async update({ request, params }: HttpContextContract) {
-    const updatedRequestValidated = await request.validate(UpdateRequestValidator);
-    return await Request.updateOrCreate({id: params.requestId}, updatedRequestValidated);
+    const updatedRequestValidated = await request.validate(
+      UpdateRequestValidator
+    );
+    return await Request.updateOrCreate(
+      { id: params.requestId },
+      updatedRequestValidated
+    );
   }
 }
