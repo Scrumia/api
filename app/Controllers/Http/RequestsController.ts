@@ -4,6 +4,7 @@ import Request from "App/Models/Request";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import CreateRequestValidator from "App/Validators/CreateRequestValidator";
 import Adventurer from "App/Models/Adventurer";
+import UpdateRequestValidator from "App/Validators/UpdateRequestValidator";
 
 export default class RequestsController {
   /**
@@ -321,5 +322,54 @@ export default class RequestsController {
     await Request.create(newRequestValidated);
 
     return response.status(201);
+  }
+
+  /**
+   * @swagger
+   * /requests:
+   *  put:
+   *   tags:
+   *   - Requests
+   *   summary: Update a request
+   *   description: Allow to update a request
+   *   security:
+   *    - bearerAuth: []
+   *   requestBody:
+   *    required: true
+   *    content:
+   *      application/json:
+   *       schema:
+   *        type: object
+   *        properties:
+   *         name:
+   *          type: string
+   *          example: Conquête d'un territoire isolé
+   *         description:
+   *          type: string
+   *          example: Nous recherchons des aventuriers capables d'assurer la conquête d'un territoire isolé.
+   *         bounty:
+   *          type: integer
+   *          example: 100
+   *         duration:
+   *          type: integer
+   *          example: 3
+   *         client_name:
+   *          type: string
+   *          example: "John Doe"
+   *         started_at:
+   *          type: date
+   *          example: 2020-04-01 00:00:00
+   *         expiration_date:
+   *          type: date
+   *          example: 2020-03-01 00:00:00
+   *   responses:
+   *    '200':
+   *      description: A successful response
+   *    '422':
+   *     description: Unprocessable entity
+   */
+  public async update({ request, params }: HttpContextContract) {
+    const updatedRequestValidated = await request.validate(UpdateRequestValidator);
+    return await Request.updateOrCreate({id: params.requestId}, updatedRequestValidated);
   }
 }
