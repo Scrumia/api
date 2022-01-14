@@ -32,6 +32,7 @@ Route.group(() => {
   // Requests
   Route.get("/requests", "RequestsController.index");
   Route.post("/requests", "RequestsController.store");
+  Route.put("/requests/:requestId", "RequestsController.update");
   Route.get("/requests/:requestId", "RequestsController.show");
   Route.delete(
     "/requests/:requestId/adventurers/:adventurerId",

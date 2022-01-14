@@ -5,6 +5,7 @@ import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import CreateRequestValidator from "App/Validators/CreateRequestValidator";
 import Adventurer from "App/Models/Adventurer";
 import AddAdventurerValidator from "App/Validators/AddAdventurerValidator";
+import UpdateRequestValidator from "App/Validators/UpdateRequestValidator";
 
 export default class RequestsController {
   /**
@@ -426,48 +427,124 @@ export default class RequestsController {
    *      description: Request not found | You can not add an adventurer on a started or finished request
    *
    */
-  public async addAdventurer({ params, request, response }: HttpContextContract) {
-    const currentRequest = await Request.query().where('id', params.requestId).first()
+  public async addAdventurer({
+    params,
+    request,
+    response,
+  }: HttpContextContract) {
+    const currentRequest = await Request.query()
+      .where("id", params.requestId)
+      .first();
 
-    if(!currentRequest) {
-      return response.status(404).send({ error: 'Request not found' })
+    if (!currentRequest) {
+      return response.status(404).send({ error: "Request not found" });
     }
-    
+
     if (currentRequest.status !== RequestStatusEnum.PENDING.value) {
-      return response.status(404).send({ error: 'You can not add an adventurer on a started or finished request' })
+      return response
+        .status(404)
+        .send({
+          error:
+            "You can not add an adventurer on a started or finished request",
+        });
     }
 
-    const newAdventurerValidated = await request.validate(AddAdventurerValidator)
+    const newAdventurerValidated = await request.validate(
+      AddAdventurerValidator
+    );
 
-    const isAdventurerAlreadyAdd = await Request
-      .query()
+    const isAdventurerAlreadyAdd = await Request.query()
       .innerJoin(
         "request_adventurers",
         "request_adventurers.request_id",
         "requests.id"
       )
-      .where("request_adventurers.adventurer_id", newAdventurerValidated.adventurer_id)
+      .where(
+        "request_adventurers.adventurer_id",
+        newAdventurerValidated.adventurer_id
+      )
       .where("request_adventurers.request_id", currentRequest.id)
-      .where('id', currentRequest.id)
-      .first()
-    
-    if(isAdventurerAlreadyAdd) {
-      return response.status(400).send({error: 'Adventurer already added'})
+      .where("id", currentRequest.id)
+      .first();
+
+    if (isAdventurerAlreadyAdd) {
+      return response.status(400).send({ error: "Adventurer already added" });
     }
 
-    const adventurer = await Adventurer.query().where('id', newAdventurerValidated.adventurer_id).where('status', AdventurerStatusEnum.AVAILABLE.value).first()
+    const adventurer = await Adventurer.query()
+      .where("id", newAdventurerValidated.adventurer_id)
+      .where("status", AdventurerStatusEnum.AVAILABLE.value)
+      .first();
 
     if (!adventurer) {
-      return response.status(400).send({ error: 'Adventurer not available' })
+      return response.status(400).send({ error: "Adventurer not available" });
     }
 
-    await currentRequest.related('adventurers').attach([adventurer.id])
+    await currentRequest.related("adventurers").attach([adventurer.id]);
 
-    adventurer.status = AdventurerStatusEnum.WORK.value
-    await adventurer.save()
+    adventurer.status = AdventurerStatusEnum.WORK.value;
+    await adventurer.save();
 
-    return await Request.query().where('id', currentRequest.id).preload('adventurers').first()
+    return await Request.query()
+      .where("id", currentRequest.id)
+      .preload("adventurers")
+      .first();
+  }
+
+  /**
+   * @swagger
+   * /requests:
+   *  put:
+   *   tags:
+   *   - Requests
+   *   summary: Update a request
+   *   description: Allow to update a request
+   *   security:
+   *    - bearerAuth: []
+   *   requestBody:
+   *    required: true
+   *    content:
+   *      application/json:
+   *       schema:
+   *        type: object
+   *        properties:
+   *         name:
+   *          type: string
+   *          example: Conquête d'un territoire isolé
+   *         description:
+   *          type: string
+   *          example: Nous recherchons des aventuriers capables d'assurer la conquête d'un territoire isolé.
+   *         bounty:
+   *          type: integer
+   *          example: 100
+   *         duration:
+   *          type: integer
+   *          example: 3
+   *         client_name:
+   *          type: string
+   *          example: "John Doe"
+   *         started_at:
+   *          type: date
+   *          example: 2020-04-01 00:00:00
+   *         expiration_date:
+   *          type: date
+   *          example: 2020-03-01 00:00:00
+   *         status:
+   *          type: string
+   *          example: "started"
+   *   responses:
+   *    '200':
+   *      description: A successful response
+   *    '422':
+   *     description: Unprocessable entity
+   */
+  public async update({ request, params }: HttpContextContract) {
+    const updatedRequestValidated = await request.validate(
+      UpdateRequestValidator
+    );
+    return await Request.updateOrCreate(
+      { id: params.requestId },
+      updatedRequestValidated
+    );
   }
 }
-
-

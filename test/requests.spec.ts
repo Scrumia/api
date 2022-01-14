@@ -366,6 +366,251 @@ test.group("Create a request", (group) => {
   });
 });
 
+test.group("Update a request", (group) => {
+  let user;
+  group.beforeEach(async () => {
+    await Database.beginGlobalTransaction();
+    user = await loginUser(BASE_URL);
+  });
+
+  group.afterEach(async () => {
+    await Database.rollbackGlobalTransaction();
+  });
+
+  test("should that return name is too long |  > 120 caracters ", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(150),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(100),
+        duration: Faker.datatype.number(100),
+        started_at: DateTime.now()
+          .plus({ day: 1 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ day: 6 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(
+          RequestStatusEnum.valuesString.split(",")
+        ),
+      });
+
+    assert.equal(body.errors[0].message, "maxLength validation failed");
+  });
+
+  test("should that return description is too long |  > 500 caracters ", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(1),
+        description: Faker.lorem.words(150),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(100),
+        duration: Faker.datatype.number(100),
+        started_at: DateTime.now()
+          .plus({ day: 1 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ day: 6 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(
+          RequestStatusEnum.valuesString.split(",")
+        ),
+      });
+
+    assert.equal(body.errors[0].message, "maxLength validation failed");
+  });
+
+  test("should that return client name is too long |  > 50 caracters ", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(1),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(150),
+        bounty: Faker.datatype.number(100),
+        duration: Faker.datatype.number(100),
+        started_at: DateTime.now()
+          .plus({ day: 1 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ day: 6 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(
+          RequestStatusEnum.valuesString.split(",")
+        ),
+      });
+
+    assert.equal(body.errors[0].message, "maxLength validation failed");
+  });
+
+  test("should that return started_at and expiration_date are sended with bad format", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(100),
+        duration: Faker.datatype.number(100),
+        started_at: "ee",
+        expiration_date: "2022",
+        status: Faker.random.arrayElement(
+          RequestStatusEnum.valuesString.split(",")
+        ),
+      });
+
+    assert.equal(
+      body.errors[0].message,
+      `the input "ee" can't be parsed as format yyyy-MM-dd HH:mm:ss`
+    );
+  });
+
+  test("should that return started_at and expiration_date has bad values", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(100),
+        duration: Faker.datatype.number(100),
+        started_at: DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now().toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(
+          RequestStatusEnum.valuesString.split(",")
+        ),
+      });
+
+    assert.equal(body.errors[0].message, `after date validation failed`);
+  });
+
+  test("should that return bounty value is not in range", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(-1),
+        duration: Faker.datatype.number(100),
+        started_at: DateTime.now()
+          .plus({ days: 2 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ days: 15 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(
+          RequestStatusEnum.valuesString.split(",")
+        ),
+      });
+
+    assert.equal(body.errors[0].message, `range validation failed`);
+  });
+
+  test("should that return duration value is not in range", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(1),
+        duration: Faker.datatype.number(1555555555),
+        started_at: DateTime.now()
+          .plus({ days: 2 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ days: 15 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(
+          RequestStatusEnum.valuesString.split(",")
+        ),
+      });
+
+    assert.equal(body.errors[0].message, `range validation failed`);
+  });
+
+  test("should that return duration value is in range", async (assert) => {
+    const { statusCode } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(1),
+        duration: Faker.datatype.number(10),
+        started_at: DateTime.now()
+          .plus({ days: 2 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ days: 15 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(
+          RequestStatusEnum.valuesString.split(",")
+        ),
+      });
+
+    assert.equal(statusCode, 200);
+  });
+
+  test("should that return status value is not correct", async (assert) => {
+    const { statusCode } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(1),
+        duration: Faker.datatype.number(10),
+        started_at: DateTime.now()
+          .plus({ days: 2 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ days: 15 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: "finish",
+      });
+
+    assert.equal(statusCode, 422);
+  });
+
+  test("should that return status value is correct", async (assert) => {
+    const { statusCode } = await supertest(BASE_URL)
+      .put("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        name: Faker.lorem.words(2),
+        description: Faker.lorem.words(2),
+        client_name: Faker.lorem.words(2),
+        bounty: Faker.datatype.number(1),
+        duration: Faker.datatype.number(10),
+        started_at: DateTime.now()
+          .plus({ days: 2 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        expiration_date: DateTime.now()
+          .plus({ days: 15 })
+          .toFormat("yyyy-MM-dd HH:mm:ss"),
+        status: Faker.random.arrayElement(
+          RequestStatusEnum.valuesString.split(",")
+        ),
+      });
+
+    assert.equal(statusCode, 200);
+  });
+});
+
 test.group("Add adventurer on a request", (group) => {
   let user;
   group.beforeEach(async () => {
@@ -377,78 +622,91 @@ test.group("Add adventurer on a request", (group) => {
     await Database.rollbackGlobalTransaction();
   });
 
-  test('should that return request not found', async (assert) => {
-    const {body, statusCode} = await supertest(BASE_URL)
-      .post('/requests/1/adventurers')
-      .set('Authorization', `Bearer ${user.token}`)
+  test("should that return request not found", async (assert) => {
+    const { body, statusCode } = await supertest(BASE_URL)
+      .post("/requests/1/adventurers")
+      .set("Authorization", `Bearer ${user.token}`)
       .send({
-        adventurer_id: 1
-      })
+        adventurer_id: 1,
+      });
 
-      assert.equal(statusCode, 404)
-      assert.equal(body.error, 'Request not found')
-  })
+    assert.equal(statusCode, 404);
+    assert.equal(body.error, "Request not found");
+  });
 
-  test('should that return cannot add adventurer on a started or finished request', async (assert) => {
-    const request = await RequestFactory.merge({status: RequestStatusEnum.STARTED.value}).create()
-    const adventurer = await AdventurerFactory.with('speciality').create()
+  test("should that return cannot add adventurer on a started or finished request", async (assert) => {
+    const request = await RequestFactory.merge({
+      status: RequestStatusEnum.STARTED.value,
+    }).create();
+    const adventurer = await AdventurerFactory.with("speciality").create();
 
-    const {body, statusCode} = await supertest(BASE_URL)
+    const { body, statusCode } = await supertest(BASE_URL)
       .post(`/requests/${request.id}/adventurers`)
-      .set('Authorization', `Bearer ${user.token}`)
+      .set("Authorization", `Bearer ${user.token}`)
       .send({
-        adventurer_id: adventurer.id
-      })
+        adventurer_id: adventurer.id,
+      });
 
-      assert.equal(statusCode, 404)
-      assert.equal(body.error, 'You can not add an adventurer on a started or finished request')
-  })
+    assert.equal(statusCode, 404);
+    assert.equal(
+      body.error,
+      "You can not add an adventurer on a started or finished request"
+    );
+  });
 
-  test('should that return adventurer not found', async (assert) => {
-    const request = await RequestFactory.merge({status: RequestStatusEnum.PENDING.value}).create()
+  test("should that return adventurer not found", async (assert) => {
+    const request = await RequestFactory.merge({
+      status: RequestStatusEnum.PENDING.value,
+    }).create();
 
-    const {body, statusCode} = await supertest(BASE_URL)
+    const { body, statusCode } = await supertest(BASE_URL)
       .post(`/requests/${request.id}/adventurers`)
-      .set('Authorization', `Bearer ${user.token}`)
+      .set("Authorization", `Bearer ${user.token}`)
       .send({
-        adventurer_id: 12
-      })
+        adventurer_id: 12,
+      });
 
-      assert.equal(statusCode, 422)
-      assert.equal(body.errors[0].message, 'exists validation failure')
-  })
- 
-  test('should that return adventurer already added', async (assert) => {
-    const request = await RequestFactory.merge({status: RequestStatusEnum.PENDING.value}).create()
-    const adventurer = await AdventurerFactory.with('speciality').create()
+    assert.equal(statusCode, 422);
+    assert.equal(body.errors[0].message, "exists validation failure");
+  });
 
-    await request.related('adventurers').attach([adventurer.id])
+  test("should that return adventurer already added", async (assert) => {
+    const request = await RequestFactory.merge({
+      status: RequestStatusEnum.PENDING.value,
+    }).create();
+    const adventurer = await AdventurerFactory.with("speciality").create();
 
-    const {body, statusCode} = await supertest(BASE_URL)
+    await request.related("adventurers").attach([adventurer.id]);
+
+    const { body, statusCode } = await supertest(BASE_URL)
       .post(`/requests/${request.id}/adventurers`)
-      .set('Authorization', `Bearer ${user.token}`)
+      .set("Authorization", `Bearer ${user.token}`)
       .send({
-        adventurer_id: adventurer.id
-      })
+        adventurer_id: adventurer.id,
+      });
 
-      assert.equal(statusCode, 400)
-      assert.equal(body.error, 'Adventurer already added')
-  })
-  
-  test('should that return adventurer is not available', async (assert) => {
-    const request = await RequestFactory.merge({status: RequestStatusEnum.PENDING.value}).create()
-    const adventurer = await AdventurerFactory.with('speciality').merge({status: AdventurerStatusEnum.WORK.value}).create()
+    assert.equal(statusCode, 400);
+    assert.equal(body.error, "Adventurer already added");
+  });
 
-    const {body, statusCode} = await supertest(BASE_URL)
+  test("should that return adventurer is not available", async (assert) => {
+    const request = await RequestFactory.merge({
+      status: RequestStatusEnum.PENDING.value,
+    }).create();
+    const adventurer = await AdventurerFactory.with("speciality")
+      .merge({ status: AdventurerStatusEnum.WORK.value })
+      .create();
+
+    const { body, statusCode } = await supertest(BASE_URL)
       .post(`/requests/${request.id}/adventurers`)
-      .set('Authorization', `Bearer ${user.token}`)
+      .set("Authorization", `Bearer ${user.token}`)
       .send({
-        adventurer_id: adventurer.id
-      })
+        adventurer_id: adventurer.id,
+      });
 
-      assert.equal(statusCode, 400)
-      assert.equal(body.error, 'Adventurer not available')
-  })
+    assert.equal(statusCode, 400);
+    assert.equal(body.error, "Adventurer not available");
+  });
 
   test("should that return request with associated adventurers", async (assert) => {
     const request = await RequestFactory.merge({
@@ -481,5 +739,4 @@ test.group("Add adventurer on a request", (group) => {
       "updated_at",
     ]);
   });
-
-})
+});
