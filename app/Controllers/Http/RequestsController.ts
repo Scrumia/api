@@ -421,9 +421,9 @@ export default class RequestsController {
    *    '200':
    *      description: Adventurer added on request
    *    '400':
-   *      description: Adventurer already added
+   *      description: Adventurer already added | Adventurer not available
    *    '404':
-   *      description: Request not found | You can not add an adventurer on a started or finished request | Adventurer not available
+   *      description: Request not found | You can not add an adventurer on a started or finished request
    *
    */
   public async addAdventurer({ params, request, response }: HttpContextContract) {
@@ -458,7 +458,7 @@ export default class RequestsController {
     const adventurer = await Adventurer.query().where('id', newAdventurerValidated.adventurer_id).where('status', AdventurerStatusEnum.AVAILABLE.value).first()
 
     if (!adventurer) {
-      return response.status(404).send({ error: 'Adventurer not available' })
+      return response.status(400).send({ error: 'Adventurer not available' })
     }
 
     await currentRequest.related('adventurers').attach([adventurer.id])
@@ -466,6 +466,8 @@ export default class RequestsController {
     adventurer.status = AdventurerStatusEnum.WORK.value
     await adventurer.save()
 
-    return await Request.query().where('id', currentRequest.id).preload('adventurers')
+    return await Request.query().where('id', currentRequest.id).preload('adventurers').first()
   }
 }
+
+

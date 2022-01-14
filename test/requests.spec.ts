@@ -7,6 +7,8 @@ import test from "japa";
 import supertest from "supertest";
 import { AdventurerFactory } from "Database/factories/AdventurerFactory";
 import Adventurer from "App/Models/Adventurer";
+import RequestStatusEnum from "App/Enums/RequestStatusEnum";
+import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
 
 const BASE_URL = `http://${process.env.HOST}:${process.env.PORT}`;
 
@@ -363,3 +365,121 @@ test.group("Create a request", (group) => {
     assert.equal(statusCode, 201);
   });
 });
+
+test.group("Add adventurer on a request", (group) => {
+  let user;
+  group.beforeEach(async () => {
+    await Database.beginGlobalTransaction();
+    user = await loginUser(BASE_URL);
+  });
+
+  group.afterEach(async () => {
+    await Database.rollbackGlobalTransaction();
+  });
+
+  test('should that return request not found', async (assert) => {
+    const {body, statusCode} = await supertest(BASE_URL)
+      .post('/requests/1/adventurers')
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({
+        adventurer_id: 1
+      })
+
+      assert.equal(statusCode, 404)
+      assert.equal(body.error, 'Request not found')
+  })
+
+  test('should that return cannot add adventurer on a started or finished request', async (assert) => {
+    const request = await RequestFactory.merge({status: RequestStatusEnum.STARTED.value}).create()
+    const adventurer = await AdventurerFactory.with('speciality').create()
+
+    const {body, statusCode} = await supertest(BASE_URL)
+      .post(`/requests/${request.id}/adventurers`)
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({
+        adventurer_id: adventurer.id
+      })
+
+      assert.equal(statusCode, 404)
+      assert.equal(body.error, 'You can not add an adventurer on a started or finished request')
+  })
+
+  test('should that return adventurer not found', async (assert) => {
+    const request = await RequestFactory.merge({status: RequestStatusEnum.PENDING.value}).create()
+
+    const {body, statusCode} = await supertest(BASE_URL)
+      .post(`/requests/${request.id}/adventurers`)
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({
+        adventurer_id: 12
+      })
+
+      assert.equal(statusCode, 422)
+      assert.equal(body.errors[0].message, 'exists validation failure')
+  })
+ 
+  test('should that return adventurer already added', async (assert) => {
+    const request = await RequestFactory.merge({status: RequestStatusEnum.PENDING.value}).create()
+    const adventurer = await AdventurerFactory.with('speciality').create()
+
+    await request.related('adventurers').attach([adventurer.id])
+
+    const {body, statusCode} = await supertest(BASE_URL)
+      .post(`/requests/${request.id}/adventurers`)
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({
+        adventurer_id: adventurer.id
+      })
+
+      assert.equal(statusCode, 400)
+      assert.equal(body.error, 'Adventurer already added')
+  })
+  
+  test('should that return adventurer is not available', async (assert) => {
+    const request = await RequestFactory.merge({status: RequestStatusEnum.PENDING.value}).create()
+    const adventurer = await AdventurerFactory.with('speciality').merge({status: AdventurerStatusEnum.WORK.value}).create()
+
+    const {body, statusCode} = await supertest(BASE_URL)
+      .post(`/requests/${request.id}/adventurers`)
+      .set('Authorization', `Bearer ${user.token}`)
+      .send({
+        adventurer_id: adventurer.id
+      })
+
+      assert.equal(statusCode, 400)
+      assert.equal(body.error, 'Adventurer not available')
+  })
+
+  test("should that return request with associated adventurers", async (assert) => {
+    const request = await RequestFactory.merge({
+      status: RequestStatusEnum.PENDING.value,
+    }).create();
+    const adventurer = await AdventurerFactory.with("speciality")
+      .merge({ status: AdventurerStatusEnum.AVAILABLE.value })
+      .create();
+
+    const { body, statusCode } = await supertest(BASE_URL)
+      .post(`/requests/${request.id}/adventurers`)
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        adventurer_id: adventurer.id,
+      });
+
+    assert.equal(statusCode, 200);
+    assert.hasAllKeys(body, [
+      "id",
+      "name",
+      "description",
+      "client_name",
+      "bounty",
+      "duration",
+      "started_at",
+      "expiration_date",
+      "status",
+      "adventurers",
+      "created_at",
+      "updated_at",
+    ]);
+  });
+
+})
