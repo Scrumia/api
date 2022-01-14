@@ -1,5 +1,5 @@
-import { schema, rules } from '@ioc:Adonis/Core/Validator'
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { schema, rules } from "@ioc:Adonis/Core/Validator";
+import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
 export default class CreateRequestValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -24,14 +24,18 @@ export default class CreateRequestValidator {
    *    ```
    */
   public schema = schema.create({
-    name: schema.string({escape: true, trim: true}, [rules.maxLength(120)]),
-    description: schema.string({escape: true, trim: true}, [rules.maxLength(500)]),
-    client_name: schema.string({escape: true, trim: true}, [rules.maxLength(50)]),
-    started_at: schema.date({ format: "yyyy-MM-dd HH:mm:ss"}, [rules.after('today')]),
-    bounty:schema.number([rules.range(0, 100000)]),
+    name: schema.string({ trim: true }, [rules.maxLength(120)]),
+    description: schema.string({ trim: true }, [rules.maxLength(500)]),
+    client_name: schema.string({ trim: true }, [rules.maxLength(50)]),
+    started_at: schema.date({ format: "yyyy-MM-dd HH:mm:ss" }, [
+      rules.after("today"),
+    ]),
+    bounty: schema.number([rules.range(0, 100000)]),
     duration: schema.number([rules.range(0, 365)]),
-    expiration_date: schema.date({ format: "yyyy-MM-dd HH:mm:ss" }, [rules.after('today')]),
-  })
+    expiration_date: schema.date({ format: "yyyy-MM-dd HH:mm:ss" }, [
+      rules.after("today"),
+    ]),
+  });
 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
@@ -44,5 +48,5 @@ export default class CreateRequestValidator {
    * }
    *
    */
-  public messages = {}
+  public messages = {};
 }

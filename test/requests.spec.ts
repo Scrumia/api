@@ -738,5 +738,5 @@ test.group("Add adventurer on a request", (group) => {
       "created_at",
       "updated_at",
     ]);
-  });
+  }).timeout(0);
 });
