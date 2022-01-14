@@ -4,6 +4,7 @@ import Request from "App/Models/Request";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import CreateRequestValidator from "App/Validators/CreateRequestValidator";
 import Adventurer from "App/Models/Adventurer";
+import AddAdventurerValidator from "App/Validators/AddAdventurerValidator";
 import UpdateRequestValidator from "App/Validators/UpdateRequestValidator";
 
 export default class RequestsController {
@@ -290,6 +291,9 @@ export default class RequestsController {
    *       schema:
    *        type: object
    *        properties:
+   *         id:
+   *          type: integer
+   *          example: 1
    *         name:
    *          type: string
    *          example: Conquête d'un territoire isolé
@@ -299,15 +303,24 @@ export default class RequestsController {
    *         bounty:
    *          type: integer
    *          example: 100
-   *         duration:
-   *          type: integer
-   *          example: 3
+   *         status:
+   *          type: string
+   *          example: started
    *         client_name:
    *          type: string
    *          example: "John Doe"
    *         started_at:
    *          type: date
    *          example: 2020-04-01 00:00:00
+   *         duration:
+   *          type: integer
+   *          example: 3
+   *         created_at:
+   *          type: string
+   *          example: "2020-05-06T14:00:00.000Z"
+   *         updated_at:
+   *          type: string
+   *          example: "2020-05-06T14:00:00.000Z"
    *         expiration_date:
    *          type: date
    *          example: 2020-03-01 00:00:00
@@ -322,6 +335,160 @@ export default class RequestsController {
     await Request.create(newRequestValidated);
 
     return response.status(201);
+  }
+
+  /**
+   * @swagger
+   * /requests/{requestId}/adventurers:
+   *  post:
+   *   tags:
+   *   - Requests
+   *   summary: Add an adventurer on a request
+   *   description: Allow to add an adventurer on a request
+   *   security:
+   *    - bearerAuth: []
+   *   requestBody:
+   *    required: true
+   *    content:
+   *      application/json:
+   *       schema:
+   *        type: object
+   *        properties:
+   *         id:
+   *          type: integer
+   *          example: 1
+   *         name:
+   *          type: string
+   *          example: Conquête d'un territoire isolé
+   *         description:
+   *          type: string
+   *          example: Nous recherchons des aventuriers capables d'assurer la conquête d'un territoire isolé.
+   *         bounty:
+   *          type: integer
+   *          example: 100
+   *         status:
+   *          type: string
+   *          example: started
+   *         client_name:
+   *          type: string
+   *          example: "John Doe"
+   *         started_at:
+   *          type: date
+   *          example: 2020-04-01 00:00:00
+   *         duration:
+   *          type: integer
+   *          example: 3
+   *         created_at:
+   *          type: string
+   *          example: "2020-05-06T14:00:00.000Z"
+   *         updated_at:
+   *          type: string
+   *          example: "2020-05-06T14:00:00.000Z"
+   *         expiration_date:
+   *          type: date
+   *          example: 2020-03-01 00:00:00
+   *         adventurers:
+   *          type: object
+   *          properties:
+   *           id:
+   *            type: integer
+   *            example: 1
+   *           full_name:
+   *            type: string
+   *            example: Sherwood Schinner
+   *           experience_level:
+   *            type: integer
+   *            example: 76
+   *           status:
+   *            type: string
+   *            example: available
+   *           speciality_id:
+   *            type: integer
+   *            example: 10
+   *           created_at:
+   *            type: string
+   *            example: "2020-05-06T14:00:00.000Z"
+   *           updated_at:
+   *            type: string
+   *            example: "2020-05-06T14:00:00.000Z"
+   *   parameters:
+   *    - in: path
+   *      name: requestId
+   *      schema:
+   *       type: integer
+   *      required: true
+   *      description: The id of the request
+   *   responses:
+   *    '200':
+   *      description: Adventurer added on request
+   *    '400':
+   *      description: Adventurer already added | Adventurer not available
+   *    '404':
+   *      description: Request not found | You can not add an adventurer on a started or finished request
+   *
+   */
+  public async addAdventurer({
+    params,
+    request,
+    response,
+  }: HttpContextContract) {
+    const currentRequest = await Request.query()
+      .where("id", params.requestId)
+      .first();
+
+    if (!currentRequest) {
+      return response.status(404).send({ error: "Request not found" });
+    }
+
+    if (currentRequest.status !== RequestStatusEnum.PENDING.value) {
+      return response
+        .status(404)
+        .send({
+          error:
+            "You can not add an adventurer on a started or finished request",
+        });
+    }
+
+    const newAdventurerValidated = await request.validate(
+      AddAdventurerValidator
+    );
+
+    const isAdventurerAlreadyAdd = await Request.query()
+      .innerJoin(
+        "request_adventurers",
+        "request_adventurers.request_id",
+        "requests.id"
+      )
+      .where(
+        "request_adventurers.adventurer_id",
+        newAdventurerValidated.adventurer_id
+      )
+      .where("request_adventurers.request_id", currentRequest.id)
+      .where("id", currentRequest.id)
+      .first();
+
+    if (isAdventurerAlreadyAdd) {
+      return response.status(400).send({ error: "Adventurer already added" });
+    }
+
+    const adventurer = await Adventurer.query()
+      .where("id", newAdventurerValidated.adventurer_id)
+      .where("status", AdventurerStatusEnum.AVAILABLE.value)
+      .first();
+
+    if (!adventurer) {
+      return response.status(400).send({ error: "Adventurer not available" });
+    }
+
+    await currentRequest.related("adventurers").attach([adventurer.id]);
+
+    adventurer.status = AdventurerStatusEnum.WORK.value;
+    await adventurer.save();
+
+    return await Request.query()
+      .where("id", currentRequest.id)
+      .preload("adventurers")
+      .first();
   }
 
   /**
