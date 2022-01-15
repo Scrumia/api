@@ -491,7 +491,7 @@ export default class RequestsController {
 
   /**
    * @swagger
-   * /requests:
+   * /requests/{requestId}:
    *  put:
    *   tags:
    *   - Requests
@@ -546,6 +546,31 @@ export default class RequestsController {
     );
   }
 
+  /**
+   * @swagger
+   * /requests/{requestId}:
+   *  delete:
+   *   tags:
+   *   - Requests
+   *   summary: Delete a request
+   *   description: Allow to delete a request
+   *   security:
+   *    - bearerAuth: []
+   *   parameters:
+   *    - in: path
+   *      name: requestId
+   *      schema:
+   *       type: integer
+   *      required: true
+   *      description: The id of the request
+   *   responses:
+   *    '204':
+   *      description: A successful response
+   *    '404':
+   *      description: Request not found
+   *    '400':
+   *      description: You can not delete a started or finished request
+   */
   public async destroy({ params, response }: HttpContextContract) {
     const request = await Request.query()
       .preload("adventurers")
