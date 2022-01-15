@@ -30,13 +30,13 @@ Route.group(() => {
   Route.get("/adventurers/:adventurerId", "AdventurersController.show");
 
   // Requests
-  Route.get("/requests", "RequestsController.index");
-  Route.post("/requests", "RequestsController.store");
-  Route.put("/requests/:requestId", "RequestsController.update");
-  Route.get("/requests/:requestId", "RequestsController.show");
+  Route.resource("requests", "RequestsController").apiOnly();
   Route.delete(
     "/requests/:requestId/adventurers/:adventurerId",
     "RequestsController.removeAdventurer"
   );
-  Route.post("/requests/:requestId/adventurers", "RequestsController.addAdventurer")
+  Route.post(
+    "/requests/:requestId/adventurers",
+    "RequestsController.addAdventurer"
+  );
 }).middleware("auth");

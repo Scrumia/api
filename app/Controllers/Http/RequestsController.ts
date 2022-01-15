@@ -1,3 +1,4 @@
+import Database from "@ioc:Adonis/Lucid/Database";
 import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
 import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import Request from "App/Models/Request";
@@ -184,7 +185,7 @@ export default class RequestsController {
    *     description: No requests found
    */
   public async show({ params, response }: HttpContextContract) {
-    const requestId = params.requestId;
+    const requestId = params.id;
     const request = await Request.query()
       .where("id", requestId)
       .preload("adventurers", (adventurer) => {
@@ -441,12 +442,9 @@ export default class RequestsController {
     }
 
     if (currentRequest.status !== RequestStatusEnum.PENDING.value) {
-      return response
-        .status(404)
-        .send({
-          error:
-            "You can not add an adventurer on a started or finished request",
-        });
+      return response.status(400).send({
+        error: "You can not add an adventurer on a started or finished request",
+      });
     }
 
     const newAdventurerValidated = await request.validate(
@@ -493,7 +491,7 @@ export default class RequestsController {
 
   /**
    * @swagger
-   * /requests:
+   * /requests/{requestId}:
    *  put:
    *   tags:
    *   - Requests
@@ -543,8 +541,60 @@ export default class RequestsController {
       UpdateRequestValidator
     );
     return await Request.updateOrCreate(
-      { id: params.requestId },
+      { id: params.id },
       updatedRequestValidated
     );
+  }
+
+  /**
+   * @swagger
+   * /requests/{requestId}:
+   *  delete:
+   *   tags:
+   *   - Requests
+   *   summary: Delete a request
+   *   description: Allow to delete a request
+   *   security:
+   *    - bearerAuth: []
+   *   parameters:
+   *    - in: path
+   *      name: requestId
+   *      schema:
+   *       type: integer
+   *      required: true
+   *      description: The id of the request
+   *   responses:
+   *    '204':
+   *      description: A successful response
+   *    '404':
+   *      description: Request not found
+   *    '400':
+   *      description: You can not delete a started or finished request
+   */
+  public async destroy({ params, response }: HttpContextContract) {
+    const request = await Request.query()
+      .preload("adventurers")
+      .where("id", params.id)
+      .first();
+
+    if (!request) {
+      return response.status(404).send({ error: "Request not found" });
+    }
+
+    if (request.status !== RequestStatusEnum.PENDING.value) {
+      return response
+        .status(400)
+        .send({ error: "Can not delete an request started or finished" });
+    }
+
+    await request.delete();
+    await Database.from("adventurers")
+      .update({ status: AdventurerStatusEnum.AVAILABLE.value })
+      .whereIn(
+        "id",
+        request.adventurers.map((adventurer) => adventurer.id)
+      );
+
+    return response.status(204);
   }
 }
