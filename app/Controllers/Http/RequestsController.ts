@@ -1,3 +1,4 @@
+import Database from "@ioc:Adonis/Lucid/Database";
 import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
 import RequestStatusEnum from "App/Enums/RequestStatusEnum";
 import Request from "App/Models/Request";
@@ -6,7 +7,6 @@ import CreateRequestValidator from "App/Validators/CreateRequestValidator";
 import Adventurer from "App/Models/Adventurer";
 import AddAdventurerValidator from "App/Validators/AddAdventurerValidator";
 import UpdateRequestValidator from "App/Validators/UpdateRequestValidator";
-import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class RequestsController {
   /**
@@ -563,11 +563,12 @@ export default class RequestsController {
     }
 
     await request.delete();
-    request.adventurers.map(async (adventurer) => {
-      await adventurer
-        .merge({ status: AdventurerStatusEnum.AVAILABLE.value })
-        .save();
-    });
+    await Database.from("adventurers")
+      .update({ status: AdventurerStatusEnum.AVAILABLE.value })
+      .whereIn(
+        "id",
+        request.adventurers.map((adventurer) => adventurer.id)
+      );
 
     return response.status(204);
   }

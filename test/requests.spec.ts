@@ -647,7 +647,7 @@ test.group("Add adventurer on a request", (group) => {
         adventurer_id: adventurer.id,
       });
 
-    assert.equal(statusCode, 404);
+    assert.equal(statusCode, 400);
     assert.equal(
       body.error,
       "You can not add an adventurer on a started or finished request"
@@ -738,5 +738,67 @@ test.group("Add adventurer on a request", (group) => {
       "created_at",
       "updated_at",
     ]);
+  }).timeout(0);
+});
+
+test.group("Delete a request", (group) => {
+  let user;
+  group.beforeEach(async () => {
+    await Database.beginGlobalTransaction();
+    user = await loginUser(BASE_URL);
+  });
+
+  group.afterEach(async () => {
+    await Database.rollbackGlobalTransaction();
+  });
+
+  test("should that return request not found", async (assert) => {
+    const { body, statusCode } = await supertest(BASE_URL)
+      .delete("/requests/1")
+      .set("Authorization", `Bearer ${user.token}`);
+    assert.equal(statusCode, 404);
+    assert.equal(body.error, "Request not found");
+  });
+
+  test("should that return cannot delete a started request or request finished", async (assert) => {
+    const request = await RequestFactory.merge({
+      status: RequestStatusEnum.FINISHED.value,
+    }).create();
+
+    const { body, statusCode } = await supertest(BASE_URL)
+      .delete(`/requests/${request.id}`)
+      .set("Authorization", `Bearer ${user.token}`);
+    assert.equal(statusCode, 400);
+    assert.equal(body.error, "Can not delete an request started or finished");
+  });
+
+  test("should that return destroy successfuly", async (assert) => {
+    const request = await RequestFactory.merge({
+      status: RequestStatusEnum.PENDING.value,
+    }).create();
+
+    const adventurers = await AdventurerFactory.merge({
+      status: AdventurerStatusEnum.WORK.value,
+    })
+      .with("speciality")
+      .createMany(2);
+
+    await request
+      .related("adventurers")
+      .attach(adventurers.map((adventurer) => adventurer.id));
+
+    const { statusCode } = await supertest(BASE_URL)
+      .delete(`/requests/${request.id}`)
+      .set("Authorization", `Bearer ${user.token}`);
+
+    assert.equal(statusCode, 204);
+
+    const adventurersUpdated = await Adventurer.findMany(
+      adventurers.map((adventurer) => adventurer.id)
+    );
+
+    adventurersUpdated.map(async (adventurer) => {
+      assert.equal(adventurer.status, AdventurerStatusEnum.AVAILABLE.value);
+    });
   }).timeout(0);
 });
