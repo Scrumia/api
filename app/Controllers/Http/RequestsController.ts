@@ -6,6 +6,7 @@ import CreateRequestValidator from "App/Validators/CreateRequestValidator";
 import Adventurer from "App/Models/Adventurer";
 import AddAdventurerValidator from "App/Validators/AddAdventurerValidator";
 import UpdateRequestValidator from "App/Validators/UpdateRequestValidator";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class RequestsController {
   /**
@@ -184,7 +185,7 @@ export default class RequestsController {
    *     description: No requests found
    */
   public async show({ params, response }: HttpContextContract) {
-    const requestId = params.requestId;
+    const requestId = params.id;
     const request = await Request.query()
       .where("id", requestId)
       .preload("adventurers", (adventurer) => {
@@ -441,12 +442,9 @@ export default class RequestsController {
     }
 
     if (currentRequest.status !== RequestStatusEnum.PENDING.value) {
-      return response
-        .status(404)
-        .send({
-          error:
-            "You can not add an adventurer on a started or finished request",
-        });
+      return response.status(400).send({
+        error: "You can not add an adventurer on a started or finished request",
+      });
     }
 
     const newAdventurerValidated = await request.validate(
@@ -543,8 +541,34 @@ export default class RequestsController {
       UpdateRequestValidator
     );
     return await Request.updateOrCreate(
-      { id: params.requestId },
+      { id: params.id },
       updatedRequestValidated
     );
+  }
+
+  public async destroy({ params, response }: HttpContextContract) {
+    const request = await Request.query()
+      .preload("adventurers")
+      .where("id", params.id)
+      .first();
+
+    if (!request) {
+      return response.status(404).send({ error: "Request not found" });
+    }
+
+    if (request.status !== RequestStatusEnum.PENDING.value) {
+      return response
+        .status(400)
+        .send({ error: "Can not delete an request started or finished" });
+    }
+
+    await request.delete();
+    request.adventurers.map(async (adventurer) => {
+      await adventurer
+        .merge({ status: AdventurerStatusEnum.AVAILABLE.value })
+        .save();
+    });
+
+    return response.status(204);
   }
 }
