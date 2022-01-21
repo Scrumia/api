@@ -7,7 +7,7 @@
     "build": "node ace build --production",
     "start": "node server.js",
     "test": "node -r @adonisjs/assembler/build/register japaFile.ts",
-    "coverage": "nyc npm run test"
+    "coverage": "nyc --reporter=text-summary npm run test"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^5.3.9",
