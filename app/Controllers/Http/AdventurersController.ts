@@ -2,6 +2,7 @@
 
 import Adventurer from "App/Models/Adventurer";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import CreateAdventurerValidator from "App/Validators/CreateAdventurerValidator";
 
 export default class AdventurersController {
   /**
@@ -122,4 +123,46 @@ export default class AdventurersController {
 
     return adventurer;
   }
+
+
+
+
+    /**
+   * @swagger
+   * /adventurers:
+   *  post:
+   *   tags:
+   *   - Adventurers
+   *   summary: Create a new adventurer
+   *   description: Allow to create a new adventurer
+   *   security:
+   *    - bearerAuth: []
+   *   requestBody:
+   *    required: true
+   *    content:
+   *      application/json:
+   *       schema:
+   *        type: object
+   *        properties:
+   *         experience_level:
+   *          type: integer
+   *          example: 32
+   *         speciality_id:
+   *          type: integer
+   *          example: 32
+   *         fullName:
+   *          type: string
+   *          example: Didier le tronçonneur
+   *   responses:
+   *    '201':
+   *      description: A successful response
+   *    '422':
+   *     description: Unprocessable entity
+   */
+     public async store({ request, response }: HttpContextContract) {
+      const newAdventurerValidated = await request.validate(CreateAdventurerValidator);
+      await Adventurer.create(newAdventurerValidated);
+  
+      return response.status(201);
+    }
 }
