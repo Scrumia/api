@@ -129,12 +129,12 @@ export default class AdventurersController {
 
     /**
    * @swagger
-   * /requests:
+   * /adventurers:
    *  post:
    *   tags:
-   *   - Requests
-   *   summary: Create a new request
-   *   description: Allow to create a new request
+   *   - Adventurers
+   *   summary: Create a new adventurer
+   *   description: Allow to create a new adventurer
    *   security:
    *    - bearerAuth: []
    *   requestBody:
@@ -147,36 +147,24 @@ export default class AdventurersController {
    *         id:
    *          type: integer
    *          example: 1
-   *         name:
-   *          type: string
-   *          example: Conquête d'un territoire isolé
-   *         description:
-   *          type: string
-   *          example: Nous recherchons des aventuriers capables d'assurer la conquête d'un territoire isolé.
-   *         bounty:
+   *         experience_level:
    *          type: integer
-   *          example: 100
+   *          example: 32
+   *         speciality_id:
+   *          type: integer
+   *          example: 32
+   *         fullName:
+   *          type: string
+   *          example: Didier le tronçonneur
    *         status:
    *          type: string
    *          example: started
-   *         client_name:
-   *          type: string
-   *          example: "John Doe"
-   *         started_at:
-   *          type: date
-   *          example: 2020-04-01 00:00:00
-   *         duration:
-   *          type: integer
-   *          example: 3
    *         created_at:
    *          type: string
    *          example: "2020-05-06T14:00:00.000Z"
    *         updated_at:
    *          type: string
    *          example: "2020-05-06T14:00:00.000Z"
-   *         expiration_date:
-   *          type: date
-   *          example: 2020-03-01 00:00:00
    *   responses:
    *    '201':
    *      description: A successful response
