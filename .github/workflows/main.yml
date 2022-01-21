@@ -44,6 +44,10 @@ jobs:
           APP_KEY: ${{secrets.APP_KEY}}
           DRIVE_DISK: local
           DB_CONNECTION: pg
+      
+      - uses: tintef/nyc-reporter-action
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deployToTest:
     name: "⚡️ Deploy to test env"
