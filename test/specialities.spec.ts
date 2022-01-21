@@ -33,5 +33,5 @@ test.group("Speciality list", (group) => {
 
     assert.equal(statusCode, 200);
     assert.hasAllKeys(body[0], ["id", "name", "created_at", "updated_at"]);
-  });
+  }).timeout(0);
 });
