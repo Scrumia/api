@@ -706,7 +706,7 @@ test.group("Add adventurer on a request", (group) => {
 
     assert.equal(statusCode, 400);
     assert.equal(body.error, "Adventurer not available");
-  });
+  }).timeout(0);
 
   test("should that return request with associated adventurers", async (assert) => {
     const request = await RequestFactory.merge({
