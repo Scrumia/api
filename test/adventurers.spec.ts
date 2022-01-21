@@ -1,5 +1,5 @@
 import { loginUser } from "./testUtils";
-import Faker from "Faker";
+import Faker from "faker";
 import Database from "@ioc:Adonis/Lucid/Database";
 import test from "japa";
 import supertest from "supertest";
