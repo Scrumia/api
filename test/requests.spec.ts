@@ -283,7 +283,7 @@ test.group("Create a request", (group) => {
       body.errors[0].message,
       `the input "ee" can't be parsed as format yyyy-MM-dd HH:mm:ss`
     );
-  });
+  }).timeout(0);
 
   test("should that return started_at and expiration_date has bad values", async (assert) => {
     const { body } = await supertest(BASE_URL)
@@ -652,7 +652,7 @@ test.group("Add adventurer on a request", (group) => {
       body.error,
       "You can not add an adventurer on a started or finished request"
     );
-  });
+  }).timeout(0);
 
   test("should that return adventurer not found", async (assert) => {
     const request = await RequestFactory.merge({
@@ -687,7 +687,7 @@ test.group("Add adventurer on a request", (group) => {
 
     assert.equal(statusCode, 400);
     assert.equal(body.error, "Adventurer already added");
-  });
+  }).timeout(0);
 
   test("should that return adventurer is not available", async (assert) => {
     const request = await RequestFactory.merge({
