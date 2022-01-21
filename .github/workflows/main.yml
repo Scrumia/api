@@ -45,7 +45,7 @@ jobs:
           DRIVE_DISK: local
           DB_CONNECTION: pg
       
-      - uses: tintef/nyc-reporter-action@0.1.0
+      - uses: tintef/nyc-reporter-action@0.2.5
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
