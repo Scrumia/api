@@ -2,6 +2,7 @@
 
 import Adventurer from "App/Models/Adventurer";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import CreateAdventurerValidator from "App/Validators/CreateAdventurerValidator";
 
 export default class AdventurersController {
   /**
@@ -122,4 +123,70 @@ export default class AdventurersController {
 
     return adventurer;
   }
+
+
+
+
+    /**
+   * @swagger
+   * /requests:
+   *  post:
+   *   tags:
+   *   - Requests
+   *   summary: Create a new request
+   *   description: Allow to create a new request
+   *   security:
+   *    - bearerAuth: []
+   *   requestBody:
+   *    required: true
+   *    content:
+   *      application/json:
+   *       schema:
+   *        type: object
+   *        properties:
+   *         id:
+   *          type: integer
+   *          example: 1
+   *         name:
+   *          type: string
+   *          example: Conquête d'un territoire isolé
+   *         description:
+   *          type: string
+   *          example: Nous recherchons des aventuriers capables d'assurer la conquête d'un territoire isolé.
+   *         bounty:
+   *          type: integer
+   *          example: 100
+   *         status:
+   *          type: string
+   *          example: started
+   *         client_name:
+   *          type: string
+   *          example: "John Doe"
+   *         started_at:
+   *          type: date
+   *          example: 2020-04-01 00:00:00
+   *         duration:
+   *          type: integer
+   *          example: 3
+   *         created_at:
+   *          type: string
+   *          example: "2020-05-06T14:00:00.000Z"
+   *         updated_at:
+   *          type: string
+   *          example: "2020-05-06T14:00:00.000Z"
+   *         expiration_date:
+   *          type: date
+   *          example: 2020-03-01 00:00:00
+   *   responses:
+   *    '201':
+   *      description: A successful response
+   *    '422':
+   *     description: Unprocessable entity
+   */
+     public async store({ request, response }: HttpContextContract) {
+      const newAdventurerValidated = await request.validate(CreateAdventurerValidator);
+      await Adventurer.create(newAdventurerValidated);
+  
+      return response.status(201);
+    }
 }
