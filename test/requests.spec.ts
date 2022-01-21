@@ -396,7 +396,7 @@ test.group("Update a request", (group) => {
         status: Faker.random.arrayElement(
           RequestStatusEnum.valuesString.split(",")
         ),
-      });
+      }).timeout(0);
 
     assert.equal(body.errors[0].message, "maxLength validation failed");
   });
@@ -423,7 +423,7 @@ test.group("Update a request", (group) => {
       });
 
     assert.equal(body.errors[0].message, "maxLength validation failed");
-  });
+  }).timeout(0);
 
   test("should that return client name is too long |  > 50 caracters ", async (assert) => {
     const { body } = await supertest(BASE_URL)
