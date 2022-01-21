@@ -3,7 +3,7 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000)
 [![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](http://api-capuche-dopale.herokuapp.com/docs)
 
-This API is built using AdonisJS
+This API is built using AdonisJS.
 
 ### ✨ [Demo](http://api-capuche-dopale.herokuapp.com/)
 
