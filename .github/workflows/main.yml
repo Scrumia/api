@@ -32,7 +32,7 @@ jobs:
           postgresql db: scrumia
 
       - run: npm install
-      - run: npm test
+      - run: npm run coverage
         env:
           HOST: 0.0.0.0
           NODE_ENV: ${{secrets.ENV_TEST}}
@@ -44,10 +44,6 @@ jobs:
           APP_KEY: ${{secrets.APP_KEY}}
           DRIVE_DISK: local
           DB_CONNECTION: pg
-      
-      - uses: tintef/nyc-reporter-action@0.2.5
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deployToTest:
     name: "⚡️ Deploy to test env"
