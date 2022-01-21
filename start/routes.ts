@@ -39,4 +39,7 @@ Route.group(() => {
     "/requests/:requestId/adventurers",
     "RequestsController.addAdventurer"
   );
+
+  // Specialities
+  Route.get("/specialities", "SpecialitiesController.index");
 }).middleware("auth");
