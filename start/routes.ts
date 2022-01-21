@@ -27,6 +27,7 @@ Route.group(() => {
 
   // Adventurers
   Route.get("/adventurers", "AdventurersController.index");
+  Route.post("/adventurers", "AdventurersController.store");
   Route.get("/adventurers/:adventurerId", "AdventurersController.show");
   Route.put("/adventurers/:adventurerId", "AdventurersController.update");
 
