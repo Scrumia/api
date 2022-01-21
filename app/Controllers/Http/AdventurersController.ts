@@ -2,6 +2,7 @@
 
 import Adventurer from "App/Models/Adventurer";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
 
 export default class AdventurersController {
   /**
@@ -121,5 +122,50 @@ export default class AdventurersController {
     }
 
     return adventurer;
+  }
+
+  /**
+   * @swagger
+   * /adventurers/{adventurerId}:
+   *  delete:
+   *   tags:
+   *   - Requests
+   *   summary: Delete an adventurer
+   *   description: Allow to delete an adventurer
+   *   security:
+   *    - bearerAuth: []
+   *   parameters:
+   *    - in: path
+   *      name: adventurerId
+   *      schema:
+   *       type: integer
+   *      required: true
+   *      description: The id of the adbventurer
+   *   responses:
+   *    '204':
+   *      description: A successful response
+   *    '404':
+   *      description: Adventurer not found
+   *    '400':
+   *      description: Can not delete an adventurer in work status
+   */
+  public async delete({ params, response }: HttpContextContract) {
+    const adventurer = await Adventurer.query()
+      .where("id", params.id)
+      .first();
+
+    if (!adventurer) {
+      return response.status(404).send({ error: "Adventurer not found" });
+    }
+
+    if (adventurer.status !== AdventurerStatusEnum.WORK.value) {
+      return response
+        .status(400)
+        .send({ error: "Can not delete an adventurer in work status" });
+    }
+
+    await adventurer.delete();
+
+    return response.status(204);
   }
 }

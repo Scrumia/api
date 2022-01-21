@@ -35,6 +35,10 @@ Route.group(() => {
     "/requests/:requestId/adventurers/:adventurerId",
     "RequestsController.removeAdventurer"
   );
+  Route.delete(
+    "/adventurers/:adventurerId",
+    "AdventurersController.delete"
+  );
   Route.post(
     "/requests/:requestId/adventurers",
     "RequestsController.addAdventurer"
