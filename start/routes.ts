@@ -28,6 +28,7 @@ Route.group(() => {
   // Adventurers
   Route.get("/adventurers", "AdventurersController.index");
   Route.get("/adventurers/:adventurerId", "AdventurersController.show");
+  Route.put("/adventurers/:adventurerId", "AdventurersController.update");
 
   // Requests
   Route.resource("requests", "RequestsController").apiOnly();
