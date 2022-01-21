@@ -196,7 +196,6 @@ export default class AdventurersController {
    *                 example: "2020-05-06T14:00:00.000Z"
    */
   public async update({ request, response, params }: HttpContextContract) {
-    console.log(params.adventurerId);
     const adventurer = await Adventurer.find(params.adventurerId)
     if (!adventurer) {
       return response.status(404).send({ error: "Adventurer not found" });
@@ -204,6 +203,7 @@ export default class AdventurersController {
     const updatedAdventurerValidated = await request.validate(
     UpdateAdventurerValidator
     );
+
     return await Adventurer.updateOrCreate(
       { id: params.adventurerId },
       updatedAdventurerValidated
