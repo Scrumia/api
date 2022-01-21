@@ -144,9 +144,6 @@ export default class AdventurersController {
    *       schema:
    *        type: object
    *        properties:
-   *         id:
-   *          type: integer
-   *          example: 1
    *         experience_level:
    *          type: integer
    *          example: 32
@@ -156,15 +153,6 @@ export default class AdventurersController {
    *         fullName:
    *          type: string
    *          example: Didier le tronçonneur
-   *         status:
-   *          type: string
-   *          example: started
-   *         created_at:
-   *          type: string
-   *          example: "2020-05-06T14:00:00.000Z"
-   *         updated_at:
-   *          type: string
-   *          example: "2020-05-06T14:00:00.000Z"
    *   responses:
    *    '201':
    *      description: A successful response
