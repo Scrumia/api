@@ -26,7 +26,7 @@ export default class CreateAdventurerValidator {
   public schema = schema.create({
     fullName: schema.string({ trim: true }, [rules.maxLength(50)]),
     experience_level: schema.number([rules.range(1, 100)]),
-    speciality_id: schema.number()
+    speciality_id: schema.number([rules.exists({ table: 'specialities', column: 'id' })])
   });
 
   /**
