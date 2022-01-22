@@ -56,11 +56,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
-        with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: ${{secrets.HEROKU_APP_NAME_TEST}}
-          heroku_email: ${{secrets.HEROKU_MAIL}}
+      # - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+      #   with:
+      #     heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+      #     heroku_app_name: ${{secrets.HEROKU_APP_NAME_TEST}}
+      #     heroku_email: ${{secrets.HEROKU_MAIL}}
+
+      - name: Heroku Review Application
+        uses: mheap/github-action-pr-heroku-review-app@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEROKU_API_TOKEN: ${{secrets.HEROKU_API_KEY}}
+          HEROKU_PIPELINE_ID: ${{secrets.HEROKU_PIPELINE_ID}}
 
   deployToProd:
     name: "🚀 Deploy to prod env"
