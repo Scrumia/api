@@ -1,3 +1,4 @@
+import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
 import { loginUser } from "./testUtils";
 import Faker from "faker";
 import Database from "@ioc:Adonis/Lucid/Database";
@@ -53,7 +54,6 @@ test.group("Adventurers list", (group) => {
     ]);
   }).timeout(0);
 });
-
 
 test.group("Get an adventurer by id", (group) => {
   let user;
@@ -119,13 +119,11 @@ test.group("Create an adventurer", (group) => {
       .send({
         fullName: Faker.lorem.words(15),
         experience_level: Faker.datatype.number(4),
-        speciality_id: speciality.id
+        speciality_id: speciality.id,
       });
-
 
     assert.equal(body.errors[0].message, "maxLength validation failed");
   });
-
 
   test("should that return experience level is too big |  > 100 ", async (assert) => {
     const speciality = await SpecialityFactory.create();
@@ -135,7 +133,7 @@ test.group("Create an adventurer", (group) => {
       .send({
         fullName: Faker.lorem.words(1),
         experience_level: 400,
-        speciality_id: speciality.id
+        speciality_id: speciality.id,
       });
 
     assert.equal(body.errors[0].message, "range validation failed");
@@ -149,23 +147,22 @@ test.group("Create an adventurer", (group) => {
       .send({
         fullName: Faker.lorem.words(1),
         experience_level: -1,
-        speciality_id: speciality.id
+        speciality_id: speciality.id,
       });
 
     assert.equal(body.errors[0].message, "range validation failed");
   });
 
-  
   test("should that return speciality_id is incorrect", async (assert) => {
     const { body } = await supertest(BASE_URL)
-    .post("/adventurers")
-    .set("Authorization", `Bearer ${user.token}`)
-    .send({
-      fullName: Faker.lorem.words(1),
-      experience_level: Faker.datatype.number(10),
-      speciality_id: -1
-    });
-    
+      .post("/adventurers")
+      .set("Authorization", `Bearer ${user.token}`)
+      .send({
+        fullName: Faker.lorem.words(1),
+        experience_level: Faker.datatype.number(10),
+        speciality_id: -1,
+      });
+
     assert.equal(body.errors[0].message, "exists validation failure");
   });
 
@@ -177,14 +174,12 @@ test.group("Create an adventurer", (group) => {
       .send({
         fullName: Faker.lorem.words(1),
         experience_level: 10,
-        speciality_id: speciality.id
+        speciality_id: speciality.id,
       });
 
     assert.equal(statusCode, 201);
   });
-
 });
-
 
 test.group("Update adventurer", (group) => {
   let user;
@@ -212,7 +207,7 @@ test.group("Update adventurer", (group) => {
       .put(`/adventurers/${adventurer.id}`)
       .set("Authorization", `Bearer ${user.token}`)
       .send({
-        fullName: 'a'.repeat(101),
+        fullName: "a".repeat(101),
         experienceLevel: 1,
         speciality_id: adventurer.speciality.id,
       });
@@ -221,17 +216,16 @@ test.group("Update adventurer", (group) => {
     assert.equal(body.errors[0].message, "maxLength validation failed");
   });
 
-
   test("should that return adventurer experienceLevel too big", async (assert) => {
     const adventurer = await AdventurerFactory.with("speciality").create();
     const { body, statusCode } = await supertest(BASE_URL)
       .put(`/adventurers/${adventurer.id}`)
       .set("Authorization", `Bearer ${user.token}`)
       .send({
-        fullName: 'John Doe',
+        fullName: "John Doe",
         experienceLevel: 101,
         speciality_id: adventurer.speciality.id,
-      })
+      });
     assert.equal(statusCode, 422);
     assert.equal(body.errors[0].message, "required validation failed");
   });
@@ -242,10 +236,10 @@ test.group("Update adventurer", (group) => {
       .put(`/adventurers/${adventurer.id}`)
       .set("Authorization", `Bearer ${user.token}`)
       .send({
-        fullName: 'John Doe',
+        fullName: "John Doe",
         experienceLevel: 0,
         speciality_id: adventurer.speciality.id,
-      })
+      });
     assert.equal(statusCode, 422);
     assert.equal(body.errors[0].message, "required validation failed");
   });
@@ -256,14 +250,13 @@ test.group("Update adventurer", (group) => {
       .put(`/adventurers/${adventurer.id}`)
       .set("Authorization", `Bearer ${user.token}`)
       .send({
-        fullName: 'John Doe',
+        fullName: "John Doe",
         experienceLevel: 1,
         speciality_id: 10000,
-      })
+      });
     assert.equal(statusCode, 422);
     assert.equal(body.errors[0].message, "required validation failed");
-  }
-  );
+  });
 
   test("should that return adventurer", async (assert) => {
     const adventurer = await AdventurerFactory.with("speciality").create();
@@ -271,7 +264,7 @@ test.group("Update adventurer", (group) => {
       .put(`/adventurers/${adventurer.id}`)
       .set("Authorization", `Bearer ${user.token}`)
       .send({
-        fullName: 'John Doe',
+        fullName: "John Doe",
         experience_level: 1,
         speciality_id: adventurer.speciality.id,
       });
@@ -286,5 +279,51 @@ test.group("Update adventurer", (group) => {
       "updated_at",
     ]);
   });
+});
 
+test.group("Delete adventurer", (group) => {
+  let user;
+  group.beforeEach(async () => {
+    await Database.beginGlobalTransaction();
+    user = await loginUser(BASE_URL);
+  });
+
+  group.afterEach(async () => {
+    await Database.rollbackGlobalTransaction();
+  });
+
+  test("should that return adventurer not found", async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .delete("/adventurers/1")
+      .set("Authorization", `Bearer ${user.token}`);
+
+    assert.equal(body.error, "Adventurer not found");
+  });
+
+  test("should that return cannot delete an adventurer with work status or rest status", async (assert) => {
+    const adventurer = await AdventurerFactory.with("speciality")
+      .merge({ status: AdventurerStatusEnum.WORK.value })
+      .create();
+
+    const { body } = await supertest(BASE_URL)
+      .delete(`/adventurers/${adventurer.id}`)
+      .set("Authorization", `Bearer ${user.token}`);
+
+    assert.equal(
+      body.error,
+      "Can not delete an adventurer in work status or rest status"
+    );
+  });
+
+  test("should that return cannot delete an adventurer with work status or rest status", async (assert) => {
+    const adventurer = await AdventurerFactory.with("speciality")
+      .merge({ status: AdventurerStatusEnum.AVAILABLE.value })
+      .create();
+
+    const { statusCode } = await supertest(BASE_URL)
+      .delete(`/adventurers/${adventurer.id}`)
+      .set("Authorization", `Bearer ${user.token}`);
+
+    assert.equal(statusCode, 204);
+  });
 });
