@@ -1,5 +1,6 @@
 import { BaseCommand } from "@adonisjs/core/build/standalone";
 import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
+import Adventurer from "App/Models/Adventurer";
 
 export default class DeleteRequest extends BaseCommand {
   /**
@@ -36,14 +37,16 @@ export default class DeleteRequest extends BaseCommand {
 
     const { default: Database } = await import("@ioc:Adonis/Lucid/Database");
 
-    const loader = await this.logger.await("Deleting requests");
+    let loader = await this.logger.await(
+      "Deleting requests with expiration date in the past"
+    );
 
-    const requestToDelete = await Request.query()
+    let requestToDelete = await Request.query()
       .where("status", RequestStatusEnum.PENDING.value)
       .where("expiration_date", "<", new Date())
       .preload("adventurers");
 
-    // Delete requests
+    // Delete requests with expiration date in the past
     await Request.query()
       .whereIn(
         "id",
@@ -71,11 +74,49 @@ export default class DeleteRequest extends BaseCommand {
       `${requestToDelete.length} requests have been deleted and ${adventurerIds.length} adventurers have been updated`
     );
 
-    const table = this.ui.table();
+    let table = this.ui.table();
     table.head(["Request ID", "Expiration date"]);
 
     requestToDelete.forEach((request) => {
       table.row([request.id.toString(), request.expirationDate.toString()]);
+    });
+
+    table.render();
+
+    await this.logger.await(
+      "Deleting requests when all adventurers are unavailable"
+    );
+
+    requestToDelete = await Request.query();
+
+    const adventurersAvailable = await Adventurer.query().where(
+      "status",
+      AdventurerStatusEnum.AVAILABLE.value
+    );
+
+    if (adventurersAvailable.length === 0) {
+      requestToDelete = await Request.query().where(
+        "status",
+        RequestStatusEnum.PENDING.value
+      );
+
+      await Request.query()
+        .whereIn(
+          "id",
+          requestToDelete.map((request) => request.id)
+        )
+        .delete();
+    }
+
+    loader.stop();
+
+    this.logger.success(`${requestToDelete.length} requests have been deleted`);
+
+    table = this.ui.table();
+    table.head(["Request ID"]);
+
+    requestToDelete.forEach((request) => {
+      table.row([request.id.toString()]);
     });
 
     table.render();
