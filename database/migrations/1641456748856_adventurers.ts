@@ -1,4 +1,5 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
+import AdventurerStatusEnum from 'App/Enums/AdventurerStatusEnum'
 
 export default class Adventurers extends BaseSchema {
   protected tableName = 'adventurers'
@@ -8,7 +9,7 @@ export default class Adventurers extends BaseSchema {
       table.increments('id')
       table.string('full_name').notNullable()
       table.float('experience_level').notNullable()
-      table.string('status').notNullable()
+      table.string('status').notNullable().defaultTo(AdventurerStatusEnum.AVAILABLE.value)
       table.integer('speciality_id').unsigned().references('specialities.id')
 
       /**
