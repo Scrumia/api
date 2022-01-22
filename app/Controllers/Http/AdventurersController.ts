@@ -129,7 +129,7 @@ export default class AdventurersController {
    * /adventurers/{adventurerId}:
    *  delete:
    *   tags:
-   *   - Requests
+   *   - Adventurers
    *   summary: Delete an adventurer
    *   description: Allow to delete an adventurer
    *   security:
@@ -140,7 +140,7 @@ export default class AdventurersController {
    *      schema:
    *       type: integer
    *      required: true
-   *      description: The id of the adbventurer
+   *      description: The id of the adventurer
    *   responses:
    *    '204':
    *      description: A successful response
@@ -151,17 +151,17 @@ export default class AdventurersController {
    */
   public async delete({ params, response }: HttpContextContract) {
     const adventurer = await Adventurer.query()
-      .where("id", params.id)
+      .where("id", params.adventurerId)
       .first();
 
     if (!adventurer) {
       return response.status(404).send({ error: "Adventurer not found" });
     }
 
-    if (adventurer.status !== AdventurerStatusEnum.WORK.value) {
-      return response
-        .status(400)
-        .send({ error: "Can not delete an adventurer in work status" });
+    if (adventurer.status !== AdventurerStatusEnum.AVAILABLE.value) {
+      return response.status(400).send({
+        error: "Can not delete an adventurer in work status or rest status",
+      });
     }
 
     await adventurer.delete();

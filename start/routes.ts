@@ -28,16 +28,13 @@ Route.group(() => {
   // Adventurers
   Route.get("/adventurers", "AdventurersController.index");
   Route.get("/adventurers/:adventurerId", "AdventurersController.show");
+  Route.delete("/adventurers/:adventurerId", "AdventurersController.delete");
 
   // Requests
   Route.resource("requests", "RequestsController").apiOnly();
   Route.delete(
     "/requests/:requestId/adventurers/:adventurerId",
     "RequestsController.removeAdventurer"
-  );
-  Route.delete(
-    "/adventurers/:adventurerId",
-    "AdventurersController.delete"
   );
   Route.post(
     "/requests/:requestId/adventurers",
