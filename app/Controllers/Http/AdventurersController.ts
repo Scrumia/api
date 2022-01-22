@@ -2,7 +2,8 @@
 
 import Adventurer from "App/Models/Adventurer";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import UpdateAdventurerValidator from 'App/Validators/UpdateAdventurerValidator';
+import AdventurerStatusEnum from "App/Enums/AdventurerStatusEnum";
+import UpdateAdventurerValidator from "App/Validators/UpdateAdventurerValidator";
 import CreateAdventurerValidator from "App/Validators/CreateAdventurerValidator";
 
 export default class AdventurersController {
@@ -125,11 +126,52 @@ export default class AdventurersController {
     return adventurer;
   }
 
+  /**
+   * @swagger
+   * /adventurers/{adventurerId}:
+   *  delete:
+   *   tags:
+   *   - Adventurers
+   *   summary: Delete an adventurer
+   *   description: Allow to delete an adventurer
+   *   security:
+   *    - bearerAuth: []
+   *   parameters:
+   *    - in: path
+   *      name: adventurerId
+   *      schema:
+   *       type: integer
+   *      required: true
+   *      description: The id of the adventurer
+   *   responses:
+   *    '204':
+   *      description: A successful response
+   *    '404':
+   *      description: Adventurer not found
+   *    '400':
+   *      description: Can not delete an adventurer in work status
+   */
+  public async delete({ params, response }: HttpContextContract) {
+    const adventurer = await Adventurer.query()
+      .where("id", params.adventurerId)
+      .first();
 
+    if (!adventurer) {
+      return response.status(404).send({ error: "Adventurer not found" });
+    }
 
+    if (adventurer.status !== AdventurerStatusEnum.AVAILABLE.value) {
+      return response.status(400).send({
+        error: "Can not delete an adventurer in work status or rest status",
+      });
+    }
 
+    await adventurer.delete();
 
- /**
+    return response.status(204);
+  }
+
+  /**
    * @swagger
    * /adventurers/{adventurerId}:
    *  put:
@@ -197,12 +239,12 @@ export default class AdventurersController {
    *                 example: "2020-05-06T14:00:00.000Z"
    */
   public async update({ request, response, params }: HttpContextContract) {
-    const adventurer = await Adventurer.find(params.adventurerId)
+    const adventurer = await Adventurer.find(params.adventurerId);
     if (!adventurer) {
       return response.status(404).send({ error: "Adventurer not found" });
     }
     const updatedAdventurerValidated = await request.validate(
-    UpdateAdventurerValidator
+      UpdateAdventurerValidator
     );
 
     return await Adventurer.updateOrCreate(
@@ -211,10 +253,7 @@ export default class AdventurersController {
     );
   }
 
-
-
-
-    /**
+  /**
    * @swagger
    * /adventurers:
    *  post:
@@ -246,10 +285,12 @@ export default class AdventurersController {
    *    '422':
    *     description: Unprocessable entity
    */
-     public async store({ request, response }: HttpContextContract) {
-      const newAdventurerValidated = await request.validate(CreateAdventurerValidator);
-      await Adventurer.create(newAdventurerValidated);
-  
-      return response.status(201);
-    }
+  public async store({ request, response }: HttpContextContract) {
+    const newAdventurerValidated = await request.validate(
+      CreateAdventurerValidator
+    );
+    await Adventurer.create(newAdventurerValidated);
+
+    return response.status(201);
+  }
 }

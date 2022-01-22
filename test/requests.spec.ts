@@ -396,7 +396,8 @@ test.group("Update a request", (group) => {
         status: Faker.random.arrayElement(
           RequestStatusEnum.valuesString.split(",")
         ),
-      }).timeout(0);
+      })
+      .timeout(0);
 
     assert.equal(body.errors[0].message, "maxLength validation failed");
   });
@@ -769,7 +770,7 @@ test.group("Delete a request", (group) => {
       .delete(`/requests/${request.id}`)
       .set("Authorization", `Bearer ${user.token}`);
     assert.equal(statusCode, 400);
-    assert.equal(body.error, "Can not delete an request started or finished");
+    assert.equal(body.error, "Can not delete a request started or finished");
   });
 
   test("should that return destroy successfuly", async (assert) => {

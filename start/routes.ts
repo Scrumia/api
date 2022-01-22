@@ -30,6 +30,7 @@ Route.group(() => {
   Route.post("/adventurers", "AdventurersController.store");
   Route.get("/adventurers/:adventurerId", "AdventurersController.show");
   Route.put("/adventurers/:adventurerId", "AdventurersController.update");
+  Route.delete("/adventurers/:adventurerId", "AdventurersController.delete");
 
   // Requests
   Route.resource("requests", "RequestsController").apiOnly();

@@ -584,7 +584,7 @@ export default class RequestsController {
     if (request.status !== RequestStatusEnum.PENDING.value) {
       return response
         .status(400)
-        .send({ error: "Can not delete an request started or finished" });
+        .send({ error: "Can not delete a request started or finished" });
     }
 
     await request.delete();
